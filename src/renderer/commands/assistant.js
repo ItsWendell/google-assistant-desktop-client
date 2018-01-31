@@ -2,9 +2,7 @@ export default [
 	{
 		smart: false,
 		indexes: [
-			'this is an test',
-			'testing',
-			'test',
+			'custom commands',
 		],
 		action: () => {
 			Window.Assistant.say('Seems like custom commands work!');

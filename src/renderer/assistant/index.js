@@ -55,7 +55,8 @@ export default class Assistant extends EventEmitter {
 	/** Triggers when the audio player has stopped playing audio. */
 	onAssistantFinishedTalking() {
 		console.log('Google Assistant audio stopped.');
-		if (false) {
+		if (this.followOn) {
+			console.log('Follow on required.');
 			this.followOn = false;
 			this.reset();
 		}
@@ -133,7 +134,7 @@ export default class Assistant extends EventEmitter {
 	 * @param {*} inputQuery
 	 */
 	assist(inputQuery = null) {
-		this.player.reset();
+		// this.player.reset();
 		if (inputQuery) {
 			this.emit('waiting');
 			this.addMessage(inputQuery, 'outgoing', true);
@@ -168,17 +169,23 @@ export default class Assistant extends EventEmitter {
 	 * @param {*} queueCommand Queue the command when the assistant has ended current converstion.
 	 */
 	runCommand(textQuery, queueCommand = false) {
-		// Check's if this is a valid command command
+		console.log('Checking if"', textQuery, '"is a command.');
 		const command = this.commands.findCommand(textQuery);
 		if (command) {
+			console.log('Command found.', command);
 			this.command = command;
 			if (!queueCommand) {
+				console.log('executing command directly.');
 				if (Commands.run(this.command)) {
+					console.log('executing command done.');
 					this.emit('ready');
 				}
 			} else {
+				console.log('executing command after session.');
 				this.assistant.once('end', () => {
+					console.log('ready for command...');
 					if (Commands.run(this.command)) {
+						console.log('command finished!');
 						this.emit('ready');
 					}
 				});
@@ -197,6 +204,7 @@ export default class Assistant extends EventEmitter {
 
 	/** Force stops the assistant & audio and it's connection to Google. */
 	forceStop() {
+		console.log('Force stopping the assistant & players...');
 		this.assistant.stop();
 		this.microphone.enabled = false;
 		this.player.stop();

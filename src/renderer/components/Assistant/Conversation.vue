@@ -49,7 +49,10 @@
 					<div
 						v-if="message.type === 'incoming'"
 						class="conversation__molecule">
-						<div class="molecule"/>
+						<img
+							src="static/molecule.svg"
+							style="max-width: 12rem"
+						/>
 					</div>
 					<div
 						class="bubble is-active"

@@ -427,8 +427,6 @@ img.powered-by-google {
 
 @media only screen and (max-width: 400px) { .conversation__molecule { left: -10px; } }
 
-.conversation__molecule .molecule { background-color: #fff; background-image: url(/static/molecule.svg); background-position: center; background-repeat: no-repeat; background-size: 115%; border-radius: 100px; height: 100%; margin: 0; position: absolute; width: 100%; }
-
 @media only screen and (min-width: 1140px) { .conversation__molecule .molecule { background-size: 90%; } }
 
 .conversation__molecule .molecule { background-size: 115%; }
