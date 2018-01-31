@@ -1,0 +1,22 @@
+---
+extends:
+  - stylelint-config-standard
+  - stylelint-config-concentric
+
+plugins:
+  - stylelint-scss
+
+processors:
+  - '@mapbox/stylelint-processor-arbitrary-tags'
+
+rules:
+  at-rule-no-unknown: null
+  declaration-empty-line-before: null
+  indentation: tab
+  no-empty-source: null
+  no-invalid-double-slash-comments: null
+  number-leading-zero: never
+  property-no-unknown:
+    - true
+    - ignoreProperties:
+        - '//'

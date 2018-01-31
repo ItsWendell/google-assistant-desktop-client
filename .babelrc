@@ -1,0 +1,43 @@
+{
+  "comments": false,
+  "env": {
+    "test": {
+      "presets": [
+        ["env", {
+          "targets": { "node": 7 }
+        }],
+        "stage-3"
+      ],
+      "plugins": ["istanbul"]
+    },
+    "main": {
+      "presets": [
+        ["env", {
+          "targets": { "node": 7 }
+        }],
+        "stage-3"
+      ]
+    },
+    "renderer": {
+      "presets": [
+        ["env", {
+          "modules": false
+        }],
+        "stage-3"
+      ]
+    },
+    "web": {
+      "presets": [
+        ["env", {
+          "modules": false
+        }],
+        "stage-3"
+      ]
+    }
+  },
+  "plugins": [
+		["transform-runtime", {
+			"polyfill": true
+		}]
+	]
+}
