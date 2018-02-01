@@ -7,11 +7,11 @@ import { installed as clientSecret } from './client_secret.json';
 const encodings = GoogleAssistant.Constants.Encoding;
 
 export default {
-	auth: {
+	google: {
 		/** [TODO]: Save tokens in local storage? */
 		/** [TODO]: Better secure client secret in main process maybe? */
 		key: clientSecret,
-		savedTokensPath: path.join(remote.app.getPath('userData'), '/tokens.json'),
+		savedTokensPath: path.join(remote.app.getPath('userData'), '/google.json'),
 	},
 	assistant: {
 		input: {
@@ -43,6 +43,8 @@ export default {
 			'user-read-currently-playing',
 			'user-modify-playback-state',
 			'user-read-playback-state',
-			'streaming'],
+			'streaming',
+		],
+		savedTokensPath: path.join(remote.app.getPath('userData'), '/spotify.json'),
 	},
 };

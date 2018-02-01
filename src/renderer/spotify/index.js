@@ -3,21 +3,51 @@ import { ipcRenderer, remote } from 'electron';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { EventEmitter } from 'events';
 import SpotifyAPIClient from 'spotify-web-api-node';
-import configuration from '@/config';
+import fs from 'fs';
+import mkdirp from 'mkdirp';
+import path from 'path';
+import config from '@/config';
 
 export default class Assistant extends EventEmitter {
 	constructor() {
 		super();
-		this.spotifyClient = new SpotifyAPIClient(configuration.spotify.client);
-		this.scopes = configuration.spotify.scopes;
+		this.spotifyClient = new SpotifyAPIClient(config.spotify.client);
+		this.scopes = config.spotify.scopes;
 		this.authenticationCode = '';
 	}
 
 	authenticate() {
-		this.authenticateApp().then(() => {
-			console.log('Spotify Succes!');
-		}).catch(() => {
-			console.log('Spotify error!');
+		this.authenticateApp().then((code) => {
+			this.processAuthentication(code);
+		}).catch((err) => {
+			this.emit('Spotify authentication error', err);
+		});
+	}
+
+	processAuthentication(code) {
+		this.spotifyClient.authorizationCodeGrant(code)
+			.then((data) => {
+				console.log('The token expires in', data.body.expires_in);
+				console.log('The access token is', data.body.access_token);
+				console.log('The refresh token is', data.body.refresh_token);
+				this.saveTokens();
+				this.emit('authenticated');
+			}, (err) => {
+				console.log('Something went wrong!', err);
+			});
+	}
+
+	saveTokens(tokens) {
+		this.spotifyClient.setAccessToken(tokens.access_token);
+		this.spotifyClient.setRefreshToken(tokens.refresh_token);
+		mkdirp(path.dirname(config.spotify.savedTokensPath), () => {
+			fs.writeFile(config.spotify.savedTokensPath, JSON.stringify(tokens), (err) => {
+				if (!err) {
+					console.debug('Tokens saved.');
+				} else {
+					console.debug('error saving tokens');
+				}
+			});
 		});
 	}
 
@@ -54,7 +84,6 @@ export default class Assistant extends EventEmitter {
 					console.log('fail load info: ', errorCode, errorDescription, validatedURL);
 				}
 			});
-
 			win.loadURL(authURL);
 		});
 	}

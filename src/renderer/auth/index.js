@@ -18,9 +18,9 @@ export default class Authenticator extends EventEmitter {
 
 		const { OAuth2 } = GoogleAuth;
 		this.OAuth2Client = new OAuth2(
-			config.auth.key.client_id,
-			config.auth.key.client_secret,
-			config.auth.key.redirect_uris[0],
+			config.google.key.client_id,
+			config.google.key.client_secret,
+			config.google.key.redirect_uris[0],
 		);
 		this.inProcess = false;
 	}
@@ -34,7 +34,7 @@ export default class Authenticator extends EventEmitter {
 			console.debug('Authenticating...');
 			try {
 				console.debug('Checking for existing tokens...');
-				fileContents = fs.readFileSync(config.auth.savedTokensPath, 'utf8');
+				fileContents = fs.readFileSync(config.google.savedTokensPath, 'utf8');
 				if (fileContents) {
 					credentials = JSON.parse(fileContents);
 					if (credentials.refresh_token) {
@@ -81,9 +81,9 @@ export default class Authenticator extends EventEmitter {
 				// retrieve access token and refresh token
 				const result = await googleOauth.getAccessToken(
 					['https://www.googleapis.com/auth/assistant-sdk-prototype'],
-					config.auth.key.client_id,
-					config.auth.key.client_secret,
-					config.auth.key.redirect_uris[0],
+					config.google.key.client_id,
+					config.google.key.client_secret,
+					config.google.key.redirect_uris[0],
 				);
 				this.inProcess = true;
 				this.saveTokens(result);
@@ -105,8 +105,8 @@ export default class Authenticator extends EventEmitter {
 	saveTokens(tokens) {
 		this.OAuth2Client.credentials = tokens;
 		console.log('Saving tokens...', tokens);
-		mkdirp(path.dirname(config.auth.savedTokensPath), () => {
-			fs.writeFile(config.auth.savedTokensPath, JSON.stringify(tokens), (err) => {
+		mkdirp(path.dirname(config.google.savedTokensPath), () => {
+			fs.writeFile(config.google.savedTokensPath, JSON.stringify(tokens), (err) => {
 				if (!err) {
 					console.debug('Tokens saved.');
 				} else {
@@ -130,6 +130,6 @@ export default class Authenticator extends EventEmitter {
 	 * Removes the locally saved tokens.
 	 */
 	static resetTokens() {
-		fs.writeFile(config.auth.savedTokensPath, '', () => console.log('tokens reset'));
+		fs.writeFile(config.google.savedTokensPath, '', () => console.log('tokens reset'));
 	}
 }
