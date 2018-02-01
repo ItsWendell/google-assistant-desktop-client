@@ -337,6 +337,10 @@ export default class Assistant extends EventEmitter {
 		 * the assistant is 'ready' for a new conversation.
 		 */
 		this.assistant.on('end', () => {
+			if (this.followOn) {
+				this.followOn = false;
+				this.assist();
+			}
 			this.player.play();
 			this.emit('ready');
 		});

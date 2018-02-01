@@ -18,6 +18,8 @@ import router from './router';
 import Vuex from 'vuex';
 import store from './store';
 
+import SpotifyClient from './spotify';
+
 
 Vue.use(Vuetify);
 Vue.use(Vuex);
@@ -28,6 +30,8 @@ Vue.http = Vue.prototype.$http = axios;
 Vue.config.productionTip = false;
 
 Window.Store = store;
+
+Window.Spotify = new SpotifyClient();
 
 /* eslint-disable no-new */
 const app = new Vue({

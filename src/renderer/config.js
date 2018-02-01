@@ -29,4 +29,20 @@ export default {
 			deviceModelId: 'ga-desktop-electron',
 		},
 	},
+	spotify: {
+		client: {
+			clientId: '84286ed53eaf4370b812263004b40c10',
+			clientSecret: 'a92ed06c4b0e413bb6ba39f0e21c1da6',
+			redirectUri: 'https://localhost/',
+		},
+		scopes: [
+			'user-read-private',
+			'user-read-email',
+			'user-top-read',
+			'user-library-read',
+			'user-read-currently-playing',
+			'user-modify-playback-state',
+			'user-read-playback-state',
+			'streaming'],
+	},
 };

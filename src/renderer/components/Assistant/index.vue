@@ -26,6 +26,11 @@
 			</v-btn>
 			<v-btn
 				icon
+				@click="openURL('https://assistant.google.com/explore')">
+				<v-icon>explore</v-icon>
+			</v-btn>
+			<v-btn
+				icon
 				@click="hideChatWindow()">
 				<v-icon>minimize</v-icon>
 			</v-btn>
@@ -99,12 +104,13 @@
 </template>
 
 <script>
+// eslint-disable-next-line
+import { ipcRenderer } from 'electron';
+import opn from 'opn';
+
 import Authentication from '@/auth';
 import Assistant from '@/assistant';
 import Conversation from './Conversation';
-// eslint-disable-next-line
-import { ipcRenderer } from 'electron';
-
 
 export default {
 	name: 'Assistant',
@@ -175,6 +181,10 @@ export default {
 					Window.Assistant.assist();
 				}
 			}
+		},
+
+		openURL(url) {
+			opn(url);
 		},
 
 		clearInput() {
