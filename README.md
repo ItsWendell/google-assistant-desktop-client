@@ -2,6 +2,8 @@
 
 This is an Google Assistant desktop client build in electron, this application is still a w.i.p.
 
+![Screenshot of Google Assistant Desktop Client](/screenshots/screenshot-merged.jpg?raw=true "Full chat window preview")
+
 ## Features
 * Google Assistant SDK v1alpha2
 * Custom Commands
