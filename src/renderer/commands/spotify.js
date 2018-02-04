@@ -3,6 +3,7 @@ export default [
 		smart: false,
 		indexes: [
 			'spotify login',
+			'login to spotify',
 		],
 		action: () => {
 			Window.Spotify.authenticate();

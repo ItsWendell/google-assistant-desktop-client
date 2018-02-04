@@ -17,6 +17,11 @@ export default class Assistant extends EventEmitter {
 	}
 
 	authenticate() {
+		// [TODO]: Load saved tokens and use refresh token to get new tokens?
+		this.spotifyAuthenticate();
+	}
+
+	spotifyAuthenticate() {
 		this.authenticateApp().then((code) => {
 			this.processAuthentication(code);
 		}).catch((err) => {
