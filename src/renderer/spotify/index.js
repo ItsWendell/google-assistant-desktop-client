@@ -30,7 +30,7 @@ export default class Assistant extends EventEmitter {
 				console.log('The token expires in', data.body.expires_in);
 				console.log('The access token is', data.body.access_token);
 				console.log('The refresh token is', data.body.refresh_token);
-				this.saveTokens();
+				this.saveTokens(data.body);
 				this.emit('authenticated');
 			}, (err) => {
 				console.log('Something went wrong!', err);
@@ -72,7 +72,7 @@ export default class Assistant extends EventEmitter {
 					console.log('fail load info: ', newURL, oldURL);
 				}
 			});
-
+			/**
 			win.webContents.on('did-fail-load', (event, errorCode, errorDescription, validatedURL) => {
 				const url = new URL(validatedURL);
 				const code = url.searchParams.get('code');
@@ -84,7 +84,16 @@ export default class Assistant extends EventEmitter {
 					console.log('fail load info: ', errorCode, errorDescription, validatedURL);
 				}
 			});
+			*/
 			win.loadURL(authURL);
+		});
+	}
+
+	getMyCurrentPlayingTrack() {
+		const reponse;
+		this.spotifyClient.getMyCurrentPlayingTrack().then((response) => {
+			console.log(response.body);
+			return response.body;
 		});
 	}
 }
