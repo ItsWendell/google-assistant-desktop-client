@@ -61,6 +61,7 @@ export default class Player extends EventEmitter {
 			this.audioBuffer.addEventListener('update', () => {
 				if (this.audioQueue.length > 0 && this.audioBuffer && !this.audioBuffer.updating) {
 					this.audioBuffer.appendBuffer(this.audioQueue.shift());
+					this.play();
 				}
 			});
 

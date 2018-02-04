@@ -23,14 +23,15 @@ export default [
 			'what artist is playing right now',
 			'who is playing right now',
 			'who\'s playing right now',
+			'what is playing',
 		],
 		action: () => {
 			Window.Spotify.getMyCurrentPlayingTrack().then((track) => {
 				console.log('spotify song', track);
-				Window.Assistant.say(''.concat(track.item.name, ' by ', track.item.artists[0].name));
+				Window.Assistant.say(`${track.item.name} by ${track.item.artists[0].name}`);
 			}).catch((err) => {
 				console.log(err);
-				Window.Assistant.say('Something went wrong getting information from Spotify, try \'spotify login\' to try again');
+				Window.Assistant.say('Something went wrong getting information from Spotify, try \'login to spotify\' to try again');
 			});
 		},
 	},
@@ -47,7 +48,7 @@ export default [
 				Window.Assistant.say('Alright!', 0, true);
 			}).catch((err) => {
 				console.log(err);
-				Window.Assistant.say('Something went wrong getting information from Spotify, try \'spotify login\' to try again');
+				Window.Assistant.say('Something went wrong getting information from Spotify, try \'login to spotify\' to try again');
 			});
 		},
 	},
