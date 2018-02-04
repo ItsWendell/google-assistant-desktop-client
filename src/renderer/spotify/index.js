@@ -90,10 +90,50 @@ export default class Assistant extends EventEmitter {
 	}
 
 	getMyCurrentPlayingTrack() {
-		const reponse;
-		this.spotifyClient.getMyCurrentPlayingTrack().then((response) => {
-			console.log(response.body);
-			return response.body;
+		return new Promise((resolve, reject) => {
+			this.spotifyClient.getMyCurrentPlayingTrack().then((response) => {
+				resolve(response.body);
+			}, (err) => {
+				reject(err);
+			});
+		});
+	}
+
+	skipToNext() {
+		return new Promise((resolve, reject) => {
+			this.spotifyClient.skipToNext().then((response) => {
+				console.log('skipped song to next...', response);
+				resolve(response);
+			}, (err) => {
+				console.log('error??');
+				reject(err);
+			});
+		});
+	}
+
+	shuffle(playTracks = true) {
+		return new Promise((resolve, reject) => {
+			this.spotifyClient.setShuffle({ state: true }).then((response) => {
+				if (playTracks) {
+					this.skipToNext();
+				}
+				resolve(response);
+			}, (err) => {
+				console.log('error??');
+				reject(err);
+			});
+		});
+	}
+
+	play() {
+		return new Promise((resolve, reject) => {
+			this.spotifyClient.play().then((response) => {
+				console.log('playing music', response);
+				resolve(response);
+			}, (err) => {
+				console.log('error??');
+				reject(err);
+			});
 		});
 	}
 }

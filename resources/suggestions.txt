@@ -1,0 +1,149 @@
+    <array name="suggestions">
+        <item>Who is Roger Federer?</item>
+        <item>How old is Adam Sandler?</item>
+        <item>Where was Ashton Kutcher born?</item>
+        <item>Who is Tiger Woods married to?</item>
+        <item>Who is Uma Thurman&apos;s sister?</item>
+        <item>Who wrote Gone with the Wind?</item>
+        <item>Who invented the mobile phone?</item>
+        <item>When is the sunrise in South Loy?</item>
+        <item>What is the time zone in Rosaside?</item>
+        <item>What time is it in Brandtview?</item>
+        <item>What is the time at home?</item>
+        <item>What&apos;s the weather like?</item>
+        <item>Do I need a jacket for tomorrow?</item>
+        <item>What&apos;s the weather going to be like in West Cedrick this afternoon?</item>
+        <item>What&apos;s the temperature outside?</item>
+        <item>Is there a chance of rain today?</item>
+        <item>What&apos;s the Motorola stock price?</item>
+        <item>What&apos;s Volkswagen trending at?</item>
+        <item>What&apos;s 500 months in numbers?</item>
+        <item>Convert 507 miles to yards?</item>
+        <item>What&apos;s 569 rupees to dollars?</item>
+        <item>What&apos;s the tip for 198 dollars?</item>
+        <item>Square root of 7579?</item>
+        <item>What&apos;s 9271 divided by 6518?</item>
+        <item>What&apos;s 40 percent of 3293?</item>
+        <item>What&apos;s 40 percent of 5617 divided by 3976?</item>
+        <item>Open youtube.com</item>
+        <item>Open Slack</item>
+        <item>Increase brightness</item>
+        <item>Take a picture</item>
+        <item>Take a selfie</item>
+        <item>Turn on WiFi</item>
+        <item>Turn on flashlight</item>
+        <item>Record a video</item>
+        <item>Increase volume</item>
+        <item>Set the volume to 6</item>
+        <item>Set the volume to full</item>
+        <item>Mute the volume</item>
+        <item>Define nemo</item>
+        <item>What&apos;s the definition of open-source?</item>
+        <item>What&apos;s the meaning of pixel?</item>
+        <item>Set an alarm in 29 minutes</item>
+        <item>Set an alarm for 09:24 AM</item>
+        <item>Set a repeating alarm for 03:06 AM</item>
+        <item>Set an alarm for 09:21 PM labeled Pick kids from school</item>
+        <item>Set a repeating alarm at 12:59 PM for Saturday</item>
+        <item>Show me my alarms</item>
+        <item>When is my next alarm?</item>
+        <item>Wake me up at 03:22 AM everyday</item>
+        <item>New meeting</item>
+        <item>Schedule an event grandmas birthday tonight at 02:36 PM</item>
+        <item>What&apos;s my next appointment?</item>
+        <item>Show me the appointments for this afternoon</item>
+        <item>What does my day look like on Sunday?</item>
+        <item>Show me my bills</item>
+        <item>Where is my package?</item>
+        <item>Where&apos;s my hotel?</item>
+        <item>Show me restaurants near my hotel</item>
+        <item>Add eggs and oranges to my shopping list.</item>
+        <item>Make a note: feed the dog</item>
+        <item>Note to self: feed the dog</item>
+        <item>Find Monte Anderson&apos;s number</item>
+        <item>When is Calista Kunde&apos;s birthday?</item>
+        <item>Call Concepcion Abernathy</item>
+        <item>Call Bobbie Ondricka on speakerphone</item>
+        <item>Call the nearest gas station</item>
+        <item>Call McDonalds</item>
+        <item>Show me my messages</item>
+        <item>Text Delta Emard What are you doing</item>
+        <item>Send an email to my brother Hey, you didn&apos;t give me feedback on the document</item>
+        <item>Send a Whatsapp message to my father</item>
+        <item>Post to Facebook</item>
+        <item>Say I want to eat something in French?</item>
+        <item>Translate Can I have water to Chinese?</item>
+        <item>Add a reminder</item>
+        <item>Remind me to download the new Foo Fighters album at 11:42 AM</item>
+        <item>Remind me to drink more water next time i&apos;m at the gym</item>
+        <item>Remind me to buy eggs at Wegmans</item>
+        <item>Remind me to buy wet wipes at pharmacy</item>
+        <item>Remind me to organize cables every Thursday</item>
+        <item>Map of Greenland</item>
+        <item>Show me nearest restaurants on map</item>
+        <item>Navigate to Hansbury by car</item>
+        <item>Navigate to my sister&apos;s place</item>
+        <item>How far is North Emilia from Mariettaport?</item>
+        <item>Walking directions to Tower Bridge</item>
+        <item>What are some attractions around here?</item>
+        <item>Show me popular museums in Africa</item>
+        <item>Where is Eifell Tower?</item>
+        <item>Is Big Ben open now?</item>
+        <item>When does Van Gogh Museum close?</item>
+        <item>Is Eifell Tower open on Thursday afternoon?</item>
+        <item>Distance from here to Tower Bridge</item>
+        <item>How far away is Cameroon?</item>
+        <item>How is Manchester United doing?</item>
+        <item>Results from Manchester City last game</item>
+        <item>When is the next Manchester City game</item>
+        <item>Did Tottenham Hotspur win the last game?</item>
+        <item>Flight AA 120</item>
+        <item>Flight status of AA 120</item>
+        <item>Has LH 210 landed?</item>
+        <item>When will AA 125 land?</item>
+        <item>Go to ABCNews</item>
+        <item>Browse androidauthority.com</item>
+        <item>When was Jupiter Ascending released?</item>
+        <item>Runtime of Inside Out?</item>
+        <item>Listen to TV</item>
+        <item>Who is the producer of Minions?</item>
+        <item>Who acted in Jurassic World?</item>
+        <item>Best movies of 2005</item>
+        <item>Best drama movies</item>
+        <item>Drama movies of 2002</item>
+        <item>Oscar winners of 2010</item>
+        <item>What are the best Anna Raadsveld movies</item>
+        <item>What movies are playing on Thursday?</item>
+        <item>Where is In the Heart of the Sea playing?</item>
+        <item>Do a barrel roll</item>
+        <item>What&apos;s the loneliest number?</item>
+        <item>Make me a sandwich</item>
+        <item>sudo Make me a sandwich</item>
+        <item>When am i?</item>
+        <item>Okay Jarvis</item>
+        <item>Who are you?</item>
+        <item>How much would could a woodchuck chuck if a woodchuck could chuck wood?</item>
+        <item>Beam me up Scotty</item>
+        <item>How can entropy be reversed?</item>
+        <item>What&apos;s Anna Raadsveld&apos;s bacon number</item>
+        <item>Tell me a joke</item>
+        <item>Up, up, down, down, left, right, left, right</item>
+        <item>Who&apos;s on first?</item>
+        <item>Go go gadget Dialer</item>
+        <item>Askew</item>
+        <item>Roll a dice</item>
+        <item>Flip a coin</item>
+        <item>Play some music</item>
+        <item>What&apos;s this song?</item>
+        <item>What song am i listening to?</item>
+        <item>Listen to my gym playlist</item>
+        <item>Next song</item>
+        <item>Pause song</item>
+        <item>Listen to pop</item>
+        <item>Play Lady Gaga</item>
+        <item>Play Love In Vain by Rolling Stones</item>
+        <item>Listen to the By the way album</item>
+        <item>Listen to AC/DC</item>
+        <item>Set timer for 20 minutes</item>
+        <item>Start countdown</item>
+    </array>

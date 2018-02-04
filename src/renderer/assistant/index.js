@@ -74,12 +74,16 @@ export default class Assistant extends EventEmitter {
 	 * @param string sentence
 	 * @param int Delay in seconds
 	 */
-	say(sentence, delay = 0) {
+	say(sentence, delay = 0, silent = false) {
 		setTimeout(() => {
 			if (this.state === 0) this.stop();
 			if (sentence) {
 				this.addMessage(sentence, 'incoming');
-				this.assistant.say(sentence);
+				if (!silent) {
+					this.assistant.say(sentence);
+				} else {
+					this.emit('ready');
+				}
 			}
 		}, 1000 * delay);
 	}
@@ -193,6 +197,7 @@ export default class Assistant extends EventEmitter {
 			}
 			return true;
 		}
+		console.log('no command found.');
 		return false;
 	}
 
