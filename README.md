@@ -7,12 +7,21 @@ This is an Google Assistant desktop client build in electron, this application i
 ## Features
 * Google Assistant SDK v1alpha2
 * Custom Commands
-
+* Spotify Client!
 ## Custom Commands
 We've implemented a way to deal with custom commands, we're using the Google Assistant SDK to recognize speech, once the speech is recongized and our 'command-engine' reconizes the command, we cancel the normal output and run the command.
 
 * play * on youtube
 * stop music, play music, stop the music, play the music.
+
+### Spotify
+There is a simple spotify web client build in which communicates with spotify devices connected to your account. Say or type 'login to spotify' to authenticate, and use the following commands.
+
+* what song is playing? What song is this? ... etc.
+* play the next song, next, play next
+* (pause music, play music triggers the keyboard play / pause buttons right now, will be connected to spotify if available soon.)
+
+ ** This feature is not perfect yet and more features are coming soon. Every time you start the assistant you need to reauthenticate for it to work properly for now. We're working on auto refreshing the tokens.
 
 ## Configuration
 There's a couple of things that need to be done in order to run this application properly.
