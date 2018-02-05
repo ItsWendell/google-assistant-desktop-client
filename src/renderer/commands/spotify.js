@@ -27,11 +27,20 @@ export default [
 		],
 		action: () => {
 			Window.Spotify.getMyCurrentPlayingTrack().then((track) => {
-				console.log('spotify song', track);
-				Window.Assistant.say(`${track.item.name} by ${track.item.artists[0].name}`);
+				console.log('Current song?', track);
+				if (track.item) {
+					console.log('spotify song', track);
+					Window.Assistant.say(`You're listening to ${track.item.name} by ${track.item.artists[0].name}`);
+				} else {
+					Window.Assistant.say('nothing is playing right now.');
+				}
 			}).catch((err) => {
-				console.log(err);
-				Window.Assistant.say('Something went wrong getting information from Spotify, try \'login to spotify\' to try again');
+				if (err.message && err.statusCode === 401) {
+					Window.Assistant.say('You\'re not logged in to Spotify, say or type \'login to spotify\' to login.');
+				} else {
+					console.log(err);
+					Window.Assistant.say('Something went wrong getting information from Spotify, try \'login to spotify\' to try again');
+				}
 			});
 		},
 	},
