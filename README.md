@@ -8,6 +8,13 @@ This is an Google Assistant desktop client build in electron, this application i
 * Google Assistant SDK v1alpha2
 * Custom Commands
 * Spotify Client!
+* Ask the user a question and get the response
+
+``` 
+Window.Assistant.ask('What is your name?').then((answer) => {
+	Window.Assistant.say(`Hello, ${answer}! How are you?`);
+});
+
 ## Custom Commands
 We've implemented a way to deal with custom commands, we're using the Google Assistant SDK to recognize speech, once the speech is recongized and our 'command-engine' reconizes the command, we cancel the normal output and run the command.
 
