@@ -7,7 +7,7 @@ import Configuration from '@/config';
 import store from '@/store';
 
 import Commands from '@/commands';
-import Cards from './cards';
+import TextFilters from './text-filters';
 
 import Player from './player';
 import Microphone from './microphone';
@@ -32,7 +32,7 @@ export default class Assistant extends EventEmitter {
 		this.assistant = new GoogleAssistant(Configuration.assistant);
 
 		/** Text-processor for incoming messages from Google */
-		this.cards = new Cards();
+		this.textFilters = new TextFilters();
 
 		/** Registers if we need to follow on the input we've given */
 		this.followOn = false;
@@ -49,7 +49,7 @@ export default class Assistant extends EventEmitter {
 		// Event for when the microphone is ready with registering.
 		this.microphone.on('ready', () => console.log('Microphone ready...'));
 		// Event for when the card processor nodes have been loaded.
-		this.cards.on('ready', () => console.log('cards ready...'));
+		this.textFilters.on('ready', () => console.log('cards ready...'));
 	}
 
 	/** Triggers when the audio player has stopped playing audio. */
@@ -88,15 +88,53 @@ export default class Assistant extends EventEmitter {
 		}, 1000 * delay);
 	}
 
+	ask(question) {
+		return new Promise((resolve) => {
+			console.log('starting ask....', question);
+			if (this.state === 0) this.stop();
+			if (question) {
+				this.addMessage(question, 'incoming', true);
+				this.assistant.once('end', () => {
+					console.log('question ended.');
+					this.player.once('waiting', () => {
+						console.log('waiting for response...');
+						this.assistant.removeAllListeners('speech-results').on('speech-results', (results) => {
+							if (results && results.length) {
+								console.info('ASK - Speech Results', results);
+								if (results.length === 1 && results[0].stability === 1) {
+									this.addMessage(results[0].transcript, 'outgoing');
+									Window.Store.state.assistant.speechTextBuffer = [];
+									this.microphone.enabled = false;
+									console.log('executing response after session.');
+									this.assistant.once('end', () => {
+										console.log('ready for response...');
+										resolve(results[0].transcript);
+									});
+									this.forceStop();
+									this.assistant.removeAllListeners('speech-results').on('speech-result', this.onSpeechResults);
+								} else {
+									Window.Store.state.assistant.speechTextBuffer = results;
+								}
+								this.emit('new-text');
+							}
+						});
+						this.assist();
+					});
+				});
+				this.assistant.say(question);
+			}
+		});
+	}
+
 	/**
 	 * Adds a message to the global assistant store to display in the UI
 	 *
 	 * @param string text
 	 * @param string type
 	 */
-	addMessage(text, type) {
+	addMessage(text, type, followup = false) {
 		this.command = null;
-		const message = this.processMessage(text, type);
+		const message = this.processMessage(text, type, followup);
 		store.commit('addMessage', message);
 		return message;
 	}
@@ -108,14 +146,14 @@ export default class Assistant extends EventEmitter {
 	 * @param {*} text
 	 * @param {*} type
 	 */
-	processMessage(text, type) {
-		const message = { text, type };
+	processMessage(text, type, followup = false) {
+		const message = { text, type, followup };
 
-		if (type !== 'incoming') {
+		if (type !== 'incoming' || followup) {
 			return message;
 		}
 
-		const returnMessage = this.cards.getMessage(text);
+		const returnMessage = this.textFilters.getMessage(text);
 		console.log(returnMessage);
 		return returnMessage;
 	}
@@ -254,21 +292,7 @@ export default class Assistant extends EventEmitter {
 		 * means we got the final message. Adds non-final messages to the speechTextBuffer
 		 * in the store so we can still display them to the user
 		  */
-		this.assistant.on('speech-results', (results) => {
-			if (results && results.length) {
-				console.info('Speech Results', results);
-				if (results.length === 1 && results[0].stability === 1) {
-					this.addMessage(results[0].transcript, 'outgoing');
-					Window.Store.state.assistant.speechTextBuffer = [];
-					this.runCommand(results[0].transcript, true);
-					this.microphone.enabled = false;
-					this.emit('waiting');
-				} else {
-					Window.Store.state.assistant.speechTextBuffer = results;
-				}
-				this.emit('new-text');
-			}
-		});
+		this.assistant.on('speech-results', this.onSpeechResults);
 
 		/**
 		 * Device action's / requests are limited right now, this is why we've build in custom commands.
@@ -349,5 +373,21 @@ export default class Assistant extends EventEmitter {
 			this.player.play();
 			this.emit('ready');
 		});
+	}
+
+	onSpeechResults(results) {
+		if (results && results.length) {
+			console.info('Speech Results', results);
+			if (results.length === 1 && results[0].stability === 1) {
+				this.addMessage(results[0].transcript, 'outgoing');
+				Window.Store.state.assistant.speechTextBuffer = [];
+				this.runCommand(results[0].transcript, true);
+				this.microphone.enabled = false;
+				this.emit('waiting');
+			} else {
+				Window.Store.state.assistant.speechTextBuffer = results;
+			}
+			this.emit('new-text');
+		}
 	}
 }

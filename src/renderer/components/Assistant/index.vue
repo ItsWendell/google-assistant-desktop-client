@@ -110,7 +110,7 @@ import opn from 'opn';
 
 import Authentication from '@/auth';
 import Assistant from '@/assistant';
-import Conversation from './Conversation';
+import Conversation from './conversation';
 
 export default {
 	name: 'Assistant',
@@ -197,6 +197,11 @@ export default {
 
 		close() {
 			ipcRenderer.send('close');
+		},
+
+		openurl(event) {
+			event.preventDefault();
+			console.log('open url event', event);
 		},
 
 		hideChatWindow() {

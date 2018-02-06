@@ -11,6 +11,20 @@ export default [
 	{
 		smart: false,
 		indexes: [
+			'talk',
+			'let\'s talk',
+			'I\'m bored',
+		],
+		action: () => {
+			Window.Assistant.ask('What do you wanna talk about?').then((answer) => {
+				Window.Assistant.say(`Alright, let's talk about ${answer}`);
+			});
+		},
+
+	},
+	{
+		smart: false,
+		indexes: [
 			'Who created you',
 			'Who is your creator',
 			'Who programmed you',

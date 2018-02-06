@@ -58,9 +58,8 @@
 						class="bubble is-active"
 						:class="{
 							'bubble--user': message.type === 'outgoing',
-							'bubble--assistant': message.type === 'incoming'}">
-						{{ message.text }}
-					</div>
+							'bubble--assistant': message.type === 'incoming'}"
+						v-html="message.text" />
 				</div>
 			</v-slide-y-transition>
 		</div>

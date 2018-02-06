@@ -8,7 +8,7 @@ import mkdirp from 'mkdirp';
 import path from 'path';
 import config from '@/config';
 
-export default class Assistant extends EventEmitter {
+export default class SpotifyClient extends EventEmitter {
 	constructor() {
 		super();
 		this.spotifyClient = new SpotifyAPIClient(config.spotify.client);
@@ -25,7 +25,7 @@ export default class Assistant extends EventEmitter {
 		this.authenticateApp().then((code) => {
 			this.processAuthentication(code);
 		}).catch((err) => {
-			this.emit('Spotify authentication error', err);
+			this.emit('unauthenticated', err);
 		});
 	}
 
@@ -36,9 +36,9 @@ export default class Assistant extends EventEmitter {
 				console.log('The access token is', data.body.access_token);
 				console.log('The refresh token is', data.body.refresh_token);
 				this.saveTokens(data.body);
-				this.emit('authenticated');
+				this.emit('authenticated', data.body);
 			}, (err) => {
-				console.log('Something went wrong!', err);
+				this.emit('error', err);
 			});
 	}
 
@@ -62,34 +62,21 @@ export default class Assistant extends EventEmitter {
 		return new Promise((resolve, reject) => {
 			const win = new BrowserWindow({ 'use-content-size': true });
 
-			win.on('closed', () => {
+			win.webContents.on('closed', () => {
 				reject(new Error('User closed the window'));
 			});
 
 			win.webContents.on('did-get-redirect-request', (event, oldURL, newURL) => {
 				const url = new URL(newURL);
+				console.log('redirect urls', oldURL, newURL);
 				const code = url.searchParams.get('code');
 				if (code) {
 					setImmediate(() => win.close());
+					win.webContents.removeAllListeners('closed');
 					console.log('Code found', code);
 					resolve(code);
-				} else {
-					console.log('fail load info: ', newURL, oldURL);
 				}
 			});
-			/**
-			win.webContents.on('did-fail-load', (event, errorCode, errorDescription, validatedURL) => {
-				const url = new URL(validatedURL);
-				const code = url.searchParams.get('code');
-				if (code) {
-					setImmediate(() => win.close());
-					console.log('Code found', code);
-					resolve(code);
-				} else {
-					console.log('fail load info: ', errorCode, errorDescription, validatedURL);
-				}
-			});
-			*/
 			win.loadURL(authURL);
 		});
 	}

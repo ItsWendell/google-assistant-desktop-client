@@ -27,12 +27,11 @@ export default [
 		],
 		action: () => {
 			Window.Spotify.getMyCurrentPlayingTrack().then((track) => {
-				console.log('Current song?', track);
+				console.log('Current track', track);
 				if (track.item) {
-					console.log('spotify song', track);
 					Window.Assistant.say(`You're listening to ${track.item.name} by ${track.item.artists[0].name}`);
 				} else {
-					Window.Assistant.say('nothing is playing right now.');
+					Window.Assistant.say('Nothing is playing right now.');
 				}
 			}).catch((err) => {
 				if (err.message && err.statusCode === 401) {
