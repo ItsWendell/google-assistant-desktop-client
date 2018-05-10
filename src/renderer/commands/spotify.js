@@ -74,4 +74,32 @@ export default [
 			});
 		},
 	},
+	{
+		smart: true,
+		indexes: [
+			'play *',
+		],
+		action: (i, wildcard) => {
+			Window.Assistant
+				.ask(`Do you want to play the track, artist, album or playlist of ${wildcard}`).then((answer) => {
+					switch (answer) {
+					case 'track':
+						Window.Assistant.say(`Playing track ${wildcard}`);
+						break;
+					case 'artist':
+						console.log('play artist');
+						break;
+					case 'album':
+						console.log('play artist');
+						break;
+					case 'playlist':
+						console.log('play artist');
+						break;
+					default:
+						Window.Assistant.say('Please try again!');
+						break;
+					}
+				});
+		},
+	},
 ];

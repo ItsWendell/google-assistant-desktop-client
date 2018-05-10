@@ -111,11 +111,9 @@ export default class Assistant extends EventEmitter {
 										resolve(results[0].transcript);
 									});
 									this.forceStop();
-									this.assistant.removeAllListeners('speech-results').on('speech-result', this.onSpeechResults);
 								} else {
 									Window.Store.state.assistant.speechTextBuffer = results;
 								}
-								this.emit('new-text');
 							}
 						});
 						this.assist();
@@ -292,7 +290,7 @@ export default class Assistant extends EventEmitter {
 		 * means we got the final message. Adds non-final messages to the speechTextBuffer
 		 * in the store so we can still display them to the user
 		  */
-		this.assistant.on('speech-results', this.onSpeechResults);
+		this.assistant.on('speech-results', this.onSpeechResults.bind(this));
 
 		/**
 		 * Device action's / requests are limited right now, this is why we've build in custom commands.
@@ -379,7 +377,7 @@ export default class Assistant extends EventEmitter {
 		if (results && results.length) {
 			console.info('Speech Results', results);
 			if (results.length === 1 && results[0].stability === 1) {
-				this.addMessage(results[0].transcript, 'outgoing');
+				this.addMessage(results[0].transcript, 'outgoing', false);
 				Window.Store.state.assistant.speechTextBuffer = [];
 				this.runCommand(results[0].transcript, true);
 				this.microphone.enabled = false;

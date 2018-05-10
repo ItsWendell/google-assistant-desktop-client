@@ -72,6 +72,7 @@ export default [
 		smart: false,
 		indexes: [
 			'exit',
+			'turn off',
 		],
 		action: () => {
 			// [TODO]: Exiting app

@@ -15,10 +15,7 @@ export default {
 	name: 'GaDesktop',
 	components: { Assistant },
 	methods: {
-		openurl(event) {
-			event.preventDefault();
-			console.log('open url event', event);
-		},
+
 	},
 };
 </script>
