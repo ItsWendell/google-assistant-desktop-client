@@ -20,6 +20,8 @@ We've also updated Electron to version 2.0 and all other NPM packages to the new
 * Only manual text input works for now, I need to fix the voice input for the new library.
 * Fix Spotify Controls
 * Look into 'Device Actions' for general custom commands
+* Update README to include other packages used
+* Update configuration notes
 
 ## Configuration
 There's a couple of things that need to be done in order to run this application properly.
@@ -51,24 +53,6 @@ npm run lint
 
 ## Used Libraries / Boilerplates
 
-* [Google Assitsant Node](https://github.com/WMisiedjan/google-assistant-node/tree/feature/v1alpha2)
-** Awaiting pull request
-* [Electron Vue]
-* 
+* [Google Assistant (A node.js implementation of the Google Assistant SDK)](https://github.com/endoplasmic/google-assistant)
 
 ---
-
-This project was generated with [electron-vue](https://github.com/SimulatedGREG/electron-vue) using [vue-cli](https://github.com/vuejs/vue-cli). Documentation about the original structure can be found [here](https://simulatedgreg.gitbooks.io/electron-vue/content/index.html).
-
-
-python devicetool.py register --model 'ga-desktop-electron' \
-                                            --type LIGHT --trait action.devices.traits.OnOff \
-                                            --trait action.devices.traits.StartStop \
-                                            --trait action.devices.traits.Toggles \
-                                            --trait action.devices.traits.Modes \
-                                            --manufacturer 'Wendell Misiedjan' \
-                                            --product-name 'Google Assistant for Desktop' \
-                                            --client-type SERVICE \
-                                            --description 'Google Assistant for Desktop' \
-                                            --device 'ga-desktop' \
-                                            --nickname 'Google Aassistant for Desktop' \
