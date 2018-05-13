@@ -74,7 +74,7 @@
     "perfect-scrollbar": "^1.3.0",
     "pump": "^2.0.1",
     "pumpify": "^1.5.0",
-    "robotjs": "^0.4.7",
+    "robotjs": "^0.5.1",
     "spotify-web-api-node": "^2.5.0",
     "spotify-web-helper": "^1.13.0",
     "v-bar": "^3.0.0",
@@ -82,7 +82,7 @@
     "vue-electron": "^1.0.6",
     "vue-perfect-scrollbar": "^0.1.0",
     "vue-router": "^3.0.1",
-    "vuetify": "0.17.6",
+    "vuetify": "^1.0.17",
     "vuex": "^3.0.1"
   },
   "devDependencies": {
@@ -107,8 +107,8 @@
     "css-loader": "^0.28.11",
     "del": "^3.0.0",
     "devtron": "^1.4.0",
-    "electron": "1.7.11",
-    "electron-builder": "^19.56.2",
+    "electron": "^2.0.0",
+    "electron-builder": "^20.13.3",
     "electron-debug": "^1.5.0",
     "electron-devtools-installer": "^2.2.4",
     "eslint": "^4.19.1",

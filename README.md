@@ -1,35 +1,25 @@
 # Google Assistant for Desktop
 
-This is an Google Assistant desktop client build in electron, this application is still a w.i.p.
+This is a new version of the Google Assistant Desktop Client - this version is using the HTML5 screen output from the Google Assistant service.
 
-![Screenshot of Google Assistant Desktop Client](/screenshots/screenshot-merged.jpg?raw=true "Full chat window preview")
+This branch is still under development but wanted it to get it out there, it still needs a lot of refactoring and fixing compability with 'endoplasmic/google-assistant' node library since we switched in this version to this libary as a base for the assistant.
+
+This application is still a w.i.p.
+
+We've also updated Electron to version 2.0 and all other NPM packages to the newest version which grealy improved speed and stability overall.
 
 ## Features
 * Google Assistant SDK v1alpha2
-* Custom Commands
-* Spotify Client!
-* Ask the user a question and get the response
+* 'Transparent' HTML5 screen output overlay
+* Suggestions are clickable
+* Screen auto-hides after x seconds depending on the output
+* Seperate screen for text-input and voice trigger
 
-``` 
-Window.Assistant.ask('What is your name?').then((answer) => {
-	Window.Assistant.say(`Hello, ${answer}! How are you?`);
-});
-```
-
-## Custom Commands
-We've implemented a way to deal with custom commands, we're using the Google Assistant SDK to recognize speech, once the speech is recongized and our 'command-engine' reconizes the command, we cancel the normal output and run the command.
-
-* play * on youtube
-* stop music, play music, stop the music, play the music.
-
-### Spotify
-There is a simple spotify web client build in which communicates with spotify devices connected to your account. Say or type 'login to spotify' to authenticate, and use the following commands.
-
-* what song is playing? What song is this? ... etc.
-* play the next song, next, play next
-* (pause music, play music triggers the keyboard play / pause buttons right now, will be connected to spotify if available soon.)
-
- ** This feature is not perfect yet and more features are coming soon. Every time you start the assistant you need to reauthenticate for it to work properly for now. We're working on auto refreshing the tokens.
+## TODO
+* Refactor custom command to 'endoplasmic/google-assistant'
+* Only manual text input works for now, I need to fix the voice input for the new library.
+* Fix Spotify Controls
+* Look into 'Device Actions' for general custom commands
 
 ## Configuration
 There's a couple of things that need to be done in order to run this application properly.
@@ -45,7 +35,7 @@ After you've got your client_secret_<client-id>.json file rename it to client_se
 
 ``` bash
 # install dependencies
-npm install (--target=1.7.11 --runtime=electron)
+npm install (--target=2.0.0 --runtime=electron)
 
 # serve with hot reload at localhost:9080
 npm run dev

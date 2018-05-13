@@ -60,6 +60,7 @@
 				hide-details
 				label="Type a message"
 				@keyup.enter="assist"
+
 			/>
 			<v-btn
 				v-if="showActions"
@@ -109,11 +110,12 @@ import { ipcRenderer } from 'electron';
 import opn from 'opn';
 
 import Authentication from '@/auth';
-import Assistant from '../../assistant/index';
+import Assistant from '@/assistant';
+import Conversation from './conversation';
 
 export default {
-	name: 'AssistantWindow',
-	components: { },
+	name: 'Assistant',
+	components: { Conversation },
 	data: () => ({
 		inputQuery: '',
 		miniMode: false,

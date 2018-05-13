@@ -10,22 +10,27 @@ if (process.env.NODE_ENV !== 'development') {
   global.__static = require('path').join(__dirname, '/static').replace(/\\/g, '\\\\') // eslint-disable-line
 }
 
-let mainWindow;
+let assistantWindow;
+let responseWindow;
 let mainTray;
-let mainWidth = 400;
-let mainHeight = 600;
+const mainWidth = 400;
+const mainHeight = 600;
 
-const winURL = process.env.NODE_ENV === 'development'
-  ? 'http://localhost:9080'
-	: `file://${__dirname}/index.html`;
+const assistantURL = process.env.NODE_ENV === 'development'
+  ? 'http://localhost:9080/assistant.html'
+	: `file://${__dirname}/assistant.html`;
+
+const responseURL = process.env.NODE_ENV === 'development'
+  ? 'http://localhost:9080/response.html'
+	: `file://${__dirname}/response.html`;
 
 /**
  * Registers the application shortcodes.
  */
 function registerShortcuts() {
 	globalShortcut.register('CommandOrControl+Option+A', () => {
-		mainWindow.show();
-		mainWindow.webContents.send('start-assistant');
+		assistantWindow.show();
+		assistantWindow.webContents.send('start-assistant');
 		// [TODO]: Play activation sound
 	});
 }
@@ -53,10 +58,10 @@ function registerTrayIcon() {
 	mainTray = new Tray(trayImage);
 	mainTray.setToolTip('Google Assistant For Desktop');
 	mainTray.on('click', () => {
-		if (!mainWindow.isVisible()) {
-			mainWindow.show();
+		if (!assistantWindow.isVisible()) {
+			assistantWindow.show();
 		} else {
-			mainWindow.hide();
+			assistantWindow.hide();
 		}
 	});
 }
@@ -67,7 +72,7 @@ function registerTrayIcon() {
 function setPosition() {
 	const bounds = mainTray.getBounds();
 	const { x, y } = bounds;
-	mainWindow.setPosition(x - (mainWidth / 2), y - mainHeight);
+	assistantWindow.setPosition(x - (mainWidth / 2), y - mainHeight);
 }
 
 /**
@@ -76,59 +81,88 @@ function setPosition() {
 function createWindow() {
 	registerTrayIcon();
 
-	ipcMain.on('minimize', () => {
-		mainWindow.hide();
-	});
-
-	ipcMain.on('close', () => {
-		mainWindow.close();
-	});
-
-	ipcMain.on('mini-mode', (event, enabled) => {
-		const position = mainWindow.getPosition();
-		// [TODO]: Check if we need to expand upwards or downwards, and if the window is out of bounds.
-		if (enabled) {
-			const { 0: width, 1: height } = mainWindow.getSize();
-			mainWidth = width;
-			mainHeight = height;
-			mainWindow.setResizable(false);
-			mainWindow.setSize(mainWidth, 60);
-			mainWindow.setPosition(position[0], position[1] + (height - 60));
-		} else {
-			mainWindow.setResizable(true);
-			mainWindow.setPosition(position[0], position[1] - (mainHeight - 60));
-			mainWindow.setSize(mainWidth, mainHeight);
-			mainWindow.setResizable(true);
+	ipcMain.on('message', (event, message) => {
+		console.log('Incoming Message: ', message);
+		assistantWindow.webContents.send('message', message);
+		if (message.event) {
+			if (message.event.cardHide) {
+				if (responseWindow) {
+					responseWindow.hide();
+				}
+			}
 		}
 	});
 
-	ipcMain.on('reload', () => {
-		mainWindow.webContents.reloadIgnoringCache();
+	ipcMain.on('response', (event, html) => {
+		responseWindow.webContents.send('response', html);
+		responseWindow.show();
 	});
+
+	ipcMain.on('miniToolbar', () => {
+		assistantWindow.setSize(104, 52, true);
+		assistantWindow.setPosition(
+			screen.getPrimaryDisplay().workAreaSize.width - 104,
+			screen.getPrimaryDisplay().workAreaSize.height - 52,
+		);
+	});
+
+	ipcMain.on('textToolbar', () => {
+		assistantWindow.setSize(326, 52, true);
+		assistantWindow.setPosition(
+			screen.getPrimaryDisplay().workAreaSize.width - 326,
+			screen.getPrimaryDisplay().workAreaSize.height - 52,
+		);
+	});
+
 
   /**
-   * Initial window options
+   * Assistant window toolbar & core
    */
-	mainWindow = new BrowserWindow({
-		height: mainHeight,
-		width: mainWidth,
-		useContentSize: true,
-		show: false,
+  // Basic: 104 x 52
+	// text-input: 326 x 52
+	assistantWindow = new BrowserWindow({
+		height: 52,
+		width: 104,
+		show: true,
 		frame: false,
+		y: screen.getPrimaryDisplay().workAreaSize.height - 52, //  - (mainHeight + 32)
+		x: screen.getPrimaryDisplay().workAreaSize.width - 104,
 		transparent: true,
 		resizable: true,
+		useContentSize: true,
+		fullscreenable: true,
 	});
 
-	mainWindow.on('closed', () => {
-		mainWindow = null;
+	/**
+   * Response Window
+   */
+	responseWindow = new BrowserWindow({
+		height: screen.getPrimaryDisplay().workAreaSize.height - 50,
+		width: screen.getPrimaryDisplay().workAreaSize.width,
+		show: false,
+		frame: false,
+		y: 50,
+		x: 0,
+		transparent: true,
+		resizable: false,
+		useContentSize: true,
 	});
 
-	mainWindow.on('ready-to-show', () => {
-		mainWindow.show();
+	assistantWindow.on('closed', () => {
+		assistantWindow = null;
 	});
 
-	mainWindow.loadURL(winURL);
-	// mainWindow.webContents.openDevTools();
+	responseWindow.on('closed', () => {
+		assistantWindow = null;
+	});
+
+	assistantWindow.on('ready-to-show', () => {
+		assistantWindow.show();
+	});
+
+	assistantWindow.loadURL(assistantURL);
+	responseWindow.loadURL(responseURL);
+	// assistantWindow.webContents.openDevTools();
 }
 
 app.on('ready', createWindow);
@@ -140,7 +174,7 @@ app.on('window-all-closed', () => {
 });
 
 app.on('activate', () => {
-	if (mainWindow === null) {
+	if (assistantWindow === null) {
 		createWindow();
 		registerShortcuts();
 		setPosition();

@@ -10,10 +10,8 @@ import Vuetify from 'vuetify';
 
 import 'vuetify/dist/vuetify.css';
 
-import App from './App';
-
-import VueRouter from 'vue-router';
-import router from './router';
+import AssistantWindow from './Assistant';
+import ResponseWindow from './Response';
 
 import Vuex from 'vuex';
 import store from './store';
@@ -23,7 +21,6 @@ import SpotifyClient from './spotify';
 
 Vue.use(Vuetify);
 Vue.use(Vuex);
-Vue.use(VueRouter);
 
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'));
 Vue.http = Vue.prototype.$http = axios;
@@ -34,14 +31,26 @@ Window.Store = store;
 Window.Spotify = new SpotifyClient();
 
 /* eslint-disable no-new */
-const app = new Vue({
-	components: { App },
+const assistantWindow = new Vue({
+	components: { AssistantWindow },
 	store,
-	router,
-	el: '#app',
-	template: '<App/>',
+	el: '#assistant',
+	template: '<AssistantWindow />',
 });
 
-Window.App = app;
+/* eslint-disable no-new */
+const responseWindow = new Vue({
+	components: { ResponseWindow },
+	store,
+	el: '#response',
+	template: '<ResponseWindow />',
+});
 
-Window.App.$mount('#app');
+
+Window.AssistantWindow = assistantWindow;
+
+Window.AssistantWindow.$mount('#assistant');
+
+Window.ResponseWindow = responseWindow;
+
+Window.ResponseWindow.$mount('#response');

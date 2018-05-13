@@ -34,17 +34,20 @@
 					<v-card-actions class="white">
 						<h3 class="action-title">{{ message.url.title }}</h3>
 						<a
+							:href="message.url.url"
 							target="_blank"
-							:href="message.url.url">https://{{ message.url.domain }}</a>
+						>
+							https://{{ message.url.domain }}
+						</a>
 					</v-card-actions>
 				</v-card>
 				<div
 					v-else
-					class="conversation__bubble is-active"
-					transition="slide-y-reverse-transition"
 					:class="{
 						'conversation__bubble--user': message.type === 'outgoing',
 						'conversation__bubble--assistant': message.type === 'incoming'}"
+					class="conversation__bubble is-active"
+					transition="slide-y-reverse-transition"
 					data-offset="0">
 					<div
 						v-if="message.type === 'incoming'"
@@ -55,10 +58,10 @@
 						/>
 					</div>
 					<div
-						class="bubble is-active"
 						:class="{
 							'bubble--user': message.type === 'outgoing',
 							'bubble--assistant': message.type === 'incoming'}"
+						class="bubble is-active"
 						v-html="message.text" />
 				</div>
 			</v-slide-y-transition>
@@ -115,7 +118,7 @@ export default {
 	},
 	updated() {
 		/** Scroll chat window when element is updated */
-		const conversation = Window.App.$el.querySelector('.main-card');
+		const conversation = Window.AssistantWindow.$el.querySelector('.main-card');
 		if (conversation) {
 			conversation.scrollTop = conversation.clientHeight + 100000000;
 		}

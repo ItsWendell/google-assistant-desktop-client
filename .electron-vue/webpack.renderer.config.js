@@ -108,8 +108,8 @@ let rendererConfig = {
   plugins: [
     new ExtractTextPlugin('styles.css'),
     new HtmlWebpackPlugin({
-      filename: 'index.html',
-      template: path.resolve(__dirname, '../src/index.ejs'),
+      filename: 'assistant.html',
+      template: path.resolve(__dirname, '../src/assistant.ejs'),
       minify: {
         collapseWhitespace: true,
         removeAttributeQuotes: true,
@@ -120,8 +120,8 @@ let rendererConfig = {
         : false
 		}),
 		new HtmlWebpackPlugin({
-      filename: 'mini.html',
-      template: path.resolve(__dirname, '../src/mini.ejs'),
+      filename: 'response.html',
+      template: path.resolve(__dirname, '../src/response.ejs'),
       minify: {
         collapseWhitespace: true,
         removeAttributeQuotes: true,

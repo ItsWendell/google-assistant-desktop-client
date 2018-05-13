@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html style="overflow: hidden;">
+  <head>
+    <meta charset="utf-8">
+    <title>ga-desktop</title>
+    <% if (htmlWebpackPlugin.options.nodeModules) { %>
+      <!-- Add `node_modules/` to global paths so `require` works properly in development -->
+      <script>
+				var module = require('module');
+				var path = require('path');
+        module.globalPaths.push('<%= htmlWebpackPlugin.options.nodeModules.replace(/\\/g, '\\\\') %>')
+				module.globalPaths.push(path.resolve('node_modules'));
+				module.globalPaths.push(path.resolve('../node_modules'));
+				module.globalPaths.push(path.resolve(__dirname, '..', '..', '..', '..',
+					'resources', 'app', 'node_modules'));
+				module.globalPaths.push(path.resolve(__dirname, '..', '..', '..', '..',
+					'resources', 'app.asar', 'node_modules'))
+			</script>
+    <% } %>
+  </head>
+  <body style="overflow: hidden;">
+    <div id="assistant">
+		</div>
+    <!-- Set `__static` path to static files in production -->
+    <script>
+      if (process.env.NODE_ENV !== 'development') window.__static = require('path').join(__dirname, '/static').replace(/\\/g, '\\\\')
+    </script>
+
+    <!-- webpack builds are automatically injected -->
+  </body>
+</html>

@@ -1,5 +1,5 @@
 // eslint-disable-next-line
-import { ipcRenderer, remote } from 'electron';
+import { ipcRenderer } from 'electron';
 import { EventEmitter } from 'events';
 import GoogleAssistant from 'google-assistant';
 
@@ -20,56 +20,13 @@ export default class Assistant extends EventEmitter {
 		this.player = new Player();
 
 		/** Microphone class build to transform the browser microphone to an output that's ready for google. */
-		this.microphone = new Microphone(Configuration.assistant.audio.sampleRateIn);
+		this.microphone = new Microphone(Configuration.assistant.input.sampleRateHertz);
 
 		/** Processor for commands */
 		this.commands = new Commands();
 
 		/** The assistant library we use to process everything and connect to Google */
-		this.assistant = undefined;
-
-		this.responseWindow = undefined;
-
-		ipcRenderer.on('message', (event, message) => {
-			console.log('Message from childeren:', message, event);
-			if (message.query) {
-				this.assist(message.query.queryText);
-			}
-		});
-
-		this.startConversation = (conversation) => {
-			conversation.on('audio-data', (data) => {
-				// console.log('incoming audio buffer...', data);
-				this.player.appendBuffer(Buffer.from(data));
-			});
-
-			conversation.on('end-of-utterance', () => {
-				console.info('End of utterance.');
-			});
-
-			conversation.on('device-action', (data) => {
-				console.log('Device action: ', data);
-			});
-
-			conversation.on('speech-results', (results) => {
-				console.log('Speech results...', results);
-			});
-
-			conversation.on('response', (text) => {
-				console.log('Response: ', text);
-			});
-
-			conversation.on('screen-data', (data) => {
-				console.log('data screen: ', data);
-				switch (data.format) {
-				case 'HTML':
-					this.updateResponseWindow(data.data.toString());
-					break;
-				default:
-					console.log('Error: unknown data format.');
-				}
-			});
-		};
+		this.assistant = new GoogleAssistant();
 
 		/** Text-processor for incoming messages from Google */
 		this.textFilters = new TextFilters();
@@ -80,11 +37,9 @@ export default class Assistant extends EventEmitter {
 		/** Store if current action is a command */
 		this.command = false;
 
-		this.player.on('ready', () => console.log('Audio player ready...'));
-
 		/** Registering events for registered services */
 
-		/** Event for when the assistant stopped talking
+		// Event for when the assistant stopped talking
 		this.player.on('waiting', () => this.onAssistantFinishedTalking());
 		// Event for when we receive input from the microphone, sending it to the Google Assistant.
 		this.microphone.on('data', data => this.assistant.writeAudio(data));
@@ -92,7 +47,6 @@ export default class Assistant extends EventEmitter {
 		this.microphone.on('ready', () => console.log('Microphone ready...'));
 		// Event for when the card processor nodes have been loaded.
 		this.textFilters.on('ready', () => console.log('cards ready...'));
-		this.player.on('ready', () => console.log('Audio player ready...')); * */
 	}
 
 	/** Triggers when the audio player has stopped playing audio. */
@@ -103,10 +57,6 @@ export default class Assistant extends EventEmitter {
 			this.followOn = false;
 			this.reset();
 		}
-	}
-
-	updateResponseWindow(html) {
-		this.emit('responseHtml', html);
 	}
 
 	/** Stops the assistant and starts directly a new assist / conversation */
@@ -203,6 +153,13 @@ export default class Assistant extends EventEmitter {
 		return returnMessage;
 	}
 
+	/** Authenticates the Google Assistant with a Google OAuth2Client */
+	authenticate(OAuth2Client) {
+		console.log('Starting assistant with this client; ', OAuth2Client);
+		this.assistant.authenticate(OAuth2Client);
+		this.emit('ready'); // [TODO]: Only fire ready when ALL assistant elements are loaded?
+	}
+
 	playPing() {
 		this.player.playPing();
 	}
@@ -219,13 +176,11 @@ export default class Assistant extends EventEmitter {
 			this.emit('waiting');
 			this.addMessage(inputQuery, 'outgoing', true);
 			if (!this.runCommand(inputQuery)) {
-				Configuration.assistant.textQuery = inputQuery;
-				this.assistant.start(Configuration.assistant, this.startConversation);
+				this.assistant.assist(inputQuery);
 			}
 		} else {
 			this.emit('loading');
-			Configuration.assistant.textQuery = undefined;
-			this.assistant.start(Configuration.assistant, this.startConversation);
+			this.assistant.assist();
 		}
 	}
 
@@ -297,19 +252,125 @@ export default class Assistant extends EventEmitter {
 	 * Sets up the Google Assistant for Electron.
 	 * @param {*} OAuth2Client
 	 */
-	authenticate() {
-		this.assistant = new GoogleAssistant(Configuration.auth);
-		this.assistant.on('ready', () => {
-			this.emit('ready');
+	setup(OAuth2Client = null) {
+		this.OAuth2Client = OAuth2Client;
+
+		/** Adds audio data from assistant to player buffer. */
+		this.assistant.on('audio-data', (data) => {
+			if (!this.command) {
+				console.log('incoming audio buffer...');
+				this.player.appendBuffer(data);
+			} else {
+				console.log('cancel command reponse audio...');
+			}
 		});
 
+		/** Processes text response if last message wasn't a command, if it is
+		 * an command it cancels the adding to the conversation, since commands will handle
+		 * this response themselves.
+		 */
+		this.assistant.on('response-text', (text) => {
+			if (!this.command) {
+				this.emit('ready');
+				this.addMessage(text, 'incoming');
+			} else {
+				console.log('cancel command reponse text...');
+			}
+		});
+
+		/** Triggered when audio input was stopped */
+		this.assistant.on('end-of-utterance', () => {
+			console.info('End of utterance.');
+		});
+
+		/** A speech-result of the given audio input to the assistant, if stability = 1
+		 * means we got the final message. Adds non-final messages to the speechTextBuffer
+		 * in the store so we can still display them to the user
+		  */
+		this.assistant.on('speech-results', this.onSpeechResults.bind(this));
+
+		/**
+		 * Device action's / requests are limited right now, this is why we've build in custom commands.
+		 * This might become handy in the future.
+		 */
+		this.assistant.on('device-request', (request) => {
+			// [TODO]: Implement device requests support.
+			console.log('Device action detected.');
+			console.log(request);
+		});
+
+		/**
+		 * This is the assistant connection telling is if we need to continue streaming the micrphone or not
+		 * We cancel this first because it's once of the first events fired.
+		 */
+		this.assistant.on('mic-mode', (mode) => {
+			// [TODO]: Continue microphone when mic-mode != 0 / same thing as follow-on
+			console.info('mic-mode', mode);
+			if (mode === 1) {
+				this.microphone.enabled = false;
+			}
+			if (this.command) {
+				this.forceStop();
+			}
+		});
+
+		/**
+		 * Assistant notices that the given OAuth2Client is not valid anymore, we emit this back to the app
+		 * so we can reauthenticate.
+		 */
+		this.assistant.on('unauthorized', () => {
+			this.emit('unauthorized');
+		});
+
+		/**
+		 * Error handeling for the assistant, since the quota for v1alpha2 is 'only' 500 requests we'll print it
+		 * when this happens, if not we'll write it to console.
+		 */
 		this.assistant.on('error', (error) => {
-			console.log('Assistant Error:', error);
+			if (error.toString().startsWith('Error: Insufficient tokens for quota')) {
+				this.addMessage('Whooppsss, quota reached. Try again later.', 'incoming');
+			} else {
+				console.log(error);
+			}
+		});
+
+		/**
+		 * Google ASsistant API tells us to continue doing this conversation because it requires
+		 * a follow on answer.
+		 * [TODO]: Properly handle follow-on's.
+		 */
+		this.assistant.on('follow-on', () => {
+			console.log('Follow-on.');
+			this.followOn = true;
+		});
+
+		/**
+		 * Google Assistant will emit this when the assistant is ready for the audio input of the microphone.
+		 */
+		this.assistant.on('ready', (textQuery) => {
+			if (!textQuery) {
+				console.log('Ready for microphone stream.');
+				this.microphone.enabled = true;
+				this.playPing();
+				this.emit('listening');
+			}
+		});
+
+		/**
+		 * Google Assistant will trigger this when all it has ended it conversation. We'll tell the app that
+		 * the assistant is 'ready' for a new conversation.
+		 */
+		this.assistant.on('end', () => {
+			if (this.followOn) {
+				this.followOn = false;
+				this.assist();
+			}
+			this.player.play();
+			this.emit('ready');
 		});
 	}
 
 	onSpeechResults(results) {
-		console.log('Speech Results:', results);
 		if (results && results.length) {
 			console.info('Speech Results', results);
 			if (results.length === 1 && results[0].stability === 1) {
