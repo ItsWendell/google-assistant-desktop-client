@@ -2,6 +2,8 @@
 
 This is a new version of the Google Assistant Desktop Client - this version is using the HTML5 screen output from the Google Assistant service.
 
+![Screenshot of Google Assistant Desktop Client](/screenshots/screenshot-3.JPG?raw=true "Full html5 window preview")
+
 This branch is still under development but wanted it to get it out there, it still needs a lot of refactoring and fixing compability with 'endoplasmic/google-assistant' node library since we switched in this version to this libary as a base for the assistant.
 
 This application is still a w.i.p.
