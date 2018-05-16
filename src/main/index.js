@@ -50,7 +50,7 @@ function registerTrayIcon() {
 	}
 	let trayImage;
 	// Determine appropriate icon for platforms
-	if (platform === 'darwin') {
+	if (platform === 'darwin' || platform === 'linux') {
 		trayImage = path.join(imageFolder, '/icon.png');
 	} else if (platform === 'win32') {
 		trayImage = path.join(imageFolder, '/icon.ico');
