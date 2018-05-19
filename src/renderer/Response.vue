@@ -2,7 +2,6 @@
 	<div id="response">
 		<iframe
 			id="frame"
-			ref="frameref"
 			class="raw-response"
 		/>
 	</div>
@@ -14,24 +13,20 @@ import jQuery from 'jquery';
 
 export default {
 	name: 'ResponseWindow',
-	components: { },
-	data: () => ({
-	}),
-	computed: {
-	},
 	mounted() {
-		// Transfer window messages to main process.
+		// Transfer window messages to the main process
 		window.addEventListener('message', (event) => {
-			console.log('Event message: ', event.data);
 			ipcRenderer.send('message', event.data);
 		});
 
-		// Set response html into iframe
+		// Incoming html response from the assistent window / process.
 		ipcRenderer.on('response', (event, html) => {
-			const responseFrame = jQuery('#frame');
-			// console.log('response event:', event, html);
-			responseFrame.get(0).srcdoc = html;
+			// Set the html content into the srcdoc of the iframe
+			jQuery('#frame').get(0).srcdoc = html;
+			// Wait half a second (so the iframe can load) before adding events
+			// TODO: Find an event trigger?
 			setTimeout(() => {
+				// If being clicked outside of the assistant main cards, send an hide event to main process.
 				jQuery('#assistant-main-cards', jQuery('#frame').get(0).contentDocument).click((e) => {
 					e.stopPropagation();
 				});
@@ -43,13 +38,11 @@ export default {
 			}, 500);
 		});
 	},
-	methods: {
-	},
 };
 </script>
 
 <style scoped>
-.raw-response {
+#frame {
 	width: 100%;
     height: 100vh;
 	border: 0;
