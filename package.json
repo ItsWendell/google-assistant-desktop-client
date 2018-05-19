@@ -18,7 +18,8 @@
     "pack:renderer": "cross-env NODE_ENV=production webpack --progress --colors --config .electron-vue/webpack.renderer.config.js",
     "test": "npm run unit && npm run e2e",
     "unit": "karma start test/unit/karma.conf.js",
-    "postinstall": "electron-builder install-app-deps"
+    "postinstall": "electron-builder install-app-deps",
+    "start": "npm run dev"
   },
   "build": {
     "productName": "Google Assistant for Desktop",
@@ -64,6 +65,7 @@
     "google-assistant": "github:WMisiedjan/google-assistant#master",
     "googleapis": "^25.0.0",
     "grpc": "^1.11.3",
+    "jquery": "^3.3.1",
     "metaget": "^1.0.6",
     "mkdirp": "^0.5.1",
     "msr": "^1.3.4",
@@ -73,7 +75,7 @@
     "pcm-convert": "^1.6.5",
     "perfect-scrollbar": "^1.3.0",
     "pump": "^2.0.1",
-    "pumpify": "^1.5.0",
+    "pumpify": "^1.5.1",
     "robotjs": "^0.5.1",
     "spotify-web-api-node": "^2.5.0",
     "spotify-web-helper": "^1.13.0",
@@ -82,7 +84,7 @@
     "vue-electron": "^1.0.6",
     "vue-perfect-scrollbar": "^0.1.0",
     "vue-router": "^3.0.1",
-    "vuetify": "^1.0.17",
+    "vuetify": "^1.0.18",
     "vuex": "^3.0.1"
   },
   "devDependencies": {
@@ -107,15 +109,15 @@
     "css-loader": "^0.28.11",
     "del": "^3.0.0",
     "devtron": "^1.4.0",
-    "electron": "^2.0.0",
-    "electron-builder": "^20.13.3",
+    "electron": "^2.0.1",
+    "electron-builder": "^20.14.4",
     "electron-debug": "^1.5.0",
     "electron-devtools-installer": "^2.2.4",
     "eslint": "^4.19.1",
     "eslint-config-airbnb-base": "^12.1.0",
     "eslint-import-resolver-webpack": "^0.8.4",
     "eslint-loader": "^1.9.0",
-    "eslint-plugin-import": "^2.11.0",
+    "eslint-plugin-import": "^2.12.0",
     "eslint-plugin-vue": "^4.5.0",
     "extract-text-webpack-plugin": "^3.0.2",
     "file-loader": "^1.1.11",
@@ -149,7 +151,7 @@
     "vue-template-compiler": "^2.5.16",
     "webpack": "^3.12.0",
     "webpack-dev-server": "^2.11.2",
-    "webpack-hot-middleware": "^2.22.1",
+    "webpack-hot-middleware": "^2.22.2",
     "webpack-merge": "^4.1.2"
   }
 }
