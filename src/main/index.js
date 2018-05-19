@@ -1,20 +1,56 @@
-import { app, BrowserWindow, ipcMain, globalShortcut, screen, Tray } from 'electron' // eslint-disable-line
+import {
+	app,
+	BrowserWindow,
+	ipcMain,
+	globalShortcut,
+	screen,
+	Tray,
+} from 'electron';
 import path from 'path';
 import os from 'os';
 
 /**
  * Set `__static` path to static files in production
- * https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-static-assets.html
+ * @see https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-static-assets.html
  */
 if (process.env.NODE_ENV !== 'development') {
-  global.__static = require('path').join(__dirname, '/static').replace(/\\/g, '\\\\') // eslint-disable-line
+	global.__static = path.join(__dirname, '/static').replace(/\\/g, '\\\\');
 }
 
+/** @type {BrowserWindow} */
 let assistantWindow;
+/** @type {BrowserWindow} */
 let responseWindow;
+/** @type {Tray} */
 let mainTray;
-const mainWidth = 400;
-const mainHeight = 600;
+
+const miniToolbarSize = {
+	width: 104,
+	height: 52,
+};
+
+const textToolbarSize = {
+	width: 326,
+	height: 52,
+};
+
+/**
+ * Set the size of the toolbar / assistant window.
+ *
+ * @param {Object} size Information about the user.
+ * @param {Number} size.width The name of the user.
+ * @param {Number} size.height {Number} The email of the user.
+ * @returns {undefined}
+ */
+function setToolbarSize({ width, height }) {
+	if (!assistantWindow) return;
+
+	assistantWindow.setSize(width, height, true);
+	assistantWindow.setPosition(
+		screen.getPrimaryDisplay().workAreaSize.width - width,
+		screen.getPrimaryDisplay().workAreaSize.height - height,
+	);
+}
 
 const assistantURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9080/assistant.html'
@@ -36,53 +72,35 @@ function registerShortcuts() {
 }
 
 /**
- * Registers the application tray icon
+ * Registers the application tray icon.
+ *
+ * @returns {Undefined}
  */
 function registerTrayIcon() {
 	const platform = os.platform();
-	let imageFolder;
-	// eslint-disable-next-line
-	if (global.__static) {
-		// eslint-disable-next-line
-		imageFolder = global.__static;
-	} else {
-		imageFolder = path.join('static');
-	}
+	const imageFolder = global.__static ? global.__static : path.join('static');
 	let trayImage;
+
 	// Determine appropriate icon for platforms
 	if (platform === 'darwin' || platform === 'linux') {
 		trayImage = path.join(imageFolder, '/icon.png');
 	} else if (platform === 'win32') {
 		trayImage = path.join(imageFolder, '/icon.ico');
 	}
+
 	mainTray = new Tray(trayImage);
 	mainTray.setToolTip('Google Assistant For Desktop');
 	mainTray.on('click', () => {
-		if (!assistantWindow.isVisible()) {
-			assistantWindow.show();
-		} else {
-			assistantWindow.hide();
-		}
+		assistantWindow.show();
 	});
 }
 
-/**
- * Sets the position of the application near the tray icon.
- */
-function setPosition() {
-	const bounds = mainTray.getBounds();
-	const { x, y } = bounds;
-	assistantWindow.setPosition(x - (mainWidth / 2), y - mainHeight);
-}
-
-/**
- * Creates the main application window.
- */
-function createWindow() {
-	registerTrayIcon();
-
+function registerEvents() {
 	ipcMain.on('message', (event, message) => {
 		console.log('Incoming Message: ', message);
+
+		if (!assistantWindow) return;
+
 		assistantWindow.webContents.send('message', message);
 		if (message.event) {
 			if (message.event.cardHide) {
@@ -94,32 +112,25 @@ function createWindow() {
 	});
 
 	ipcMain.on('response', (event, html) => {
+		if (!responseWindow) return;
 		responseWindow.webContents.send('response', html);
 		responseWindow.show();
 	});
 
 	ipcMain.on('miniToolbar', () => {
-		assistantWindow.setSize(104, 52, true);
-		assistantWindow.setPosition(
-			screen.getPrimaryDisplay().workAreaSize.width - 104,
-			screen.getPrimaryDisplay().workAreaSize.height - 52,
-		);
+		setToolbarSize(miniToolbarSize);
 	});
 
 	ipcMain.on('textToolbar', () => {
-		assistantWindow.setSize(326, 52, true);
-		assistantWindow.setPosition(
-			screen.getPrimaryDisplay().workAreaSize.width - 326,
-			screen.getPrimaryDisplay().workAreaSize.height - 52,
-		);
+		setToolbarSize(textToolbarSize);
 	});
+}
 
-
-  /**
-   * Assistant window toolbar & core
-   */
-  // Basic: 104 x 52
-	// text-input: 326 x 52
+/**
+ * Creates the main application window.
+ */
+function createWindows() {
+	/** Assistant core and toolbar */
 	assistantWindow = new BrowserWindow({
 		height: 52,
 		width: 104,
@@ -133,18 +144,16 @@ function createWindow() {
 		fullscreenable: true,
 	});
 
-	/**
-   * Response Window
-   */
+	/** Response window will be hidden until needed */
 	responseWindow = new BrowserWindow({
-		height: screen.getPrimaryDisplay().workAreaSize.height - 50,
+		height: screen.getPrimaryDisplay().workAreaSize.height,
 		width: screen.getPrimaryDisplay().workAreaSize.width,
 		show: false,
 		frame: false,
-		y: 50,
+		resizable: false,
+		y: 0,
 		x: 0,
 		transparent: true,
-		resizable: false,
 		useContentSize: true,
 	});
 
@@ -153,7 +162,7 @@ function createWindow() {
 	});
 
 	responseWindow.on('closed', () => {
-		assistantWindow = null;
+		responseWindow = null;
 	});
 
 	assistantWindow.on('ready-to-show', () => {
@@ -162,10 +171,18 @@ function createWindow() {
 
 	assistantWindow.loadURL(assistantURL);
 	responseWindow.loadURL(responseURL);
-	// assistantWindow.webContents.openDevTools();
 }
 
-app.on('ready', createWindow);
+
+function initializeApp() {
+	createWindows();
+	registerEvents();
+	registerTrayIcon();
+	registerShortcuts();
+}
+
+// NOTE: Setting a timeout here fixes the issues for linux transparency!
+app.on('ready', setTimeout(initializeApp, 100));
 
 app.on('window-all-closed', () => {
 	if (process.platform !== 'darwin') {
@@ -174,13 +191,12 @@ app.on('window-all-closed', () => {
 });
 
 app.on('activate', () => {
-	if (assistantWindow === null) {
-		createWindow();
-		registerShortcuts();
-		setPosition();
+	if (assistantWindow === null || responseWindow === null) {
+		assistantWindow = null;
+		responseWindow = null;
+		initializeApp();
 	}
 });
-
 
 /**
  * Auto Updater
