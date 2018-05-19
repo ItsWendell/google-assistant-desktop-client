@@ -3,7 +3,8 @@
   <head>
     <meta charset="utf-8">
     <title>ga-desktop</title>
-    <% if (htmlWebpackPlugin.options.nodeModules) { %>
+		<% if (htmlWebpackPlugin.options.nodeModules) { %>
+			<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
       <!-- Add `node_modules/` to global paths so `require` works properly in development -->
       <script>
 				var module = require('module');

@@ -1,15 +1,16 @@
 <template>
 	<div id="response">
 		<iframe
-			ref="responseframe"
+			id="frame"
+			ref="frameref"
 			class="raw-response"
 		/>
 	</div>
 </template>
 
 <script>
-// eslint-disable-next-line
 import { ipcRenderer } from 'electron';
+import jQuery from 'jquery';
 
 export default {
 	name: 'ResponseWindow',
@@ -27,8 +28,19 @@ export default {
 
 		// Set response html into iframe
 		ipcRenderer.on('response', (event, html) => {
-			console.log('response event:', event, html);
-			this.$refs.responseframe.srcdoc = html;
+			const responseFrame = jQuery('#frame');
+			// console.log('response event:', event, html);
+			responseFrame.get(0).srcdoc = html;
+			setTimeout(() => {
+				jQuery('#assistant-main-cards', jQuery('#frame').get(0).contentDocument).click((e) => {
+					e.stopPropagation();
+				});
+
+				jQuery('html', jQuery('#frame').get(0).contentDocument).click(() => {
+					const eventOut = { event: { cardHide: true } };
+					ipcRenderer.send('message', eventOut);
+				});
+			}, 500);
 		});
 	},
 	methods: {
