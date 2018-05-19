@@ -4,10 +4,8 @@ import { EventEmitter } from 'events';
 import GoogleAssistant from 'google-assistant';
 
 import Configuration from '@/config';
-import store from '@/store';
 
 import Commands from '@/commands';
-import TextFilters from './text-filters';
 
 import Player from './player';
 import Microphone from './microphone';
@@ -30,6 +28,8 @@ export default class Assistant extends EventEmitter {
 
 		this.responseWindow = undefined;
 
+		this.conversation = undefined;
+
 		ipcRenderer.on('message', (event, message) => {
 			console.log('Message from childeren:', message, event);
 			if (message.query) {
@@ -38,21 +38,26 @@ export default class Assistant extends EventEmitter {
 		});
 
 		this.startConversation = (conversation) => {
+			if (Configuration.assistant.textQuery === undefined) {
+				this.emit('listening');
+				this.microphone.enabled = true;
+			}
+
 			conversation.on('audio-data', (data) => {
 				// console.log('incoming audio buffer...', data);
 				this.player.appendBuffer(Buffer.from(data));
 			});
 
 			conversation.on('end-of-utterance', () => {
-				console.info('End of utterance.');
+				this.microphone.enabled = false;
 			});
 
 			conversation.on('device-action', (data) => {
 				console.log('Device action: ', data);
 			});
 
-			conversation.on('speech-results', (results) => {
-				console.log('Speech results...', results);
+			conversation.on('transcription', ({ transcription, done }) => {
+				console.log('Transcription: ', transcription, done);
 			});
 
 			conversation.on('response', (text) => {
@@ -60,7 +65,6 @@ export default class Assistant extends EventEmitter {
 			});
 
 			conversation.on('screen-data', (data) => {
-				console.log('data screen: ', data);
 				switch (data.format) {
 				case 'HTML':
 					this.updateResponseWindow(data.data.toString());
@@ -69,10 +73,21 @@ export default class Assistant extends EventEmitter {
 					console.log('Error: unknown data format.');
 				}
 			});
-		};
 
-		/** Text-processor for incoming messages from Google */
-		this.textFilters = new TextFilters();
+			conversation.on('ended', (error = undefined, followUp = false) => {
+				if (followUp && !Configuration.assistant.textQuery) {
+					this.assist();
+				}
+
+				if (error) {
+					console.log('Conversation error', error);
+				}
+
+				this.emit('ready');
+			});
+
+			this.conversation = conversation;
+		};
 
 		/** Registers if we need to follow on the input we've given */
 		this.followOn = false;
@@ -82,17 +97,16 @@ export default class Assistant extends EventEmitter {
 
 		this.player.on('ready', () => console.log('Audio player ready...'));
 
-		/** Registering events for registered services */
+		this.microphone.on('data', (data) => {
+			const buffer = Buffer.from(data);
+			if (this.conversation) {
+				this.conversation.write(buffer);
+			}
+		});
 
-		/** Event for when the assistant stopped talking
-		this.player.on('waiting', () => this.onAssistantFinishedTalking());
-		// Event for when we receive input from the microphone, sending it to the Google Assistant.
-		this.microphone.on('data', data => this.assistant.writeAudio(data));
-		// Event for when the microphone is ready with registering.
 		this.microphone.on('ready', () => console.log('Microphone ready...'));
-		// Event for when the card processor nodes have been loaded.
-		this.textFilters.on('ready', () => console.log('cards ready...'));
-		this.player.on('ready', () => console.log('Audio player ready...')); * */
+
+		/** Registering events for registered services */
 	}
 
 	/** Triggers when the audio player has stopped playing audio. */
@@ -123,84 +137,15 @@ export default class Assistant extends EventEmitter {
 	 */
 	say(sentence, delay = 0, silent = false) {
 		setTimeout(() => {
-			if (this.state === 0) this.stop();
+			this.stopConversation();
 			if (sentence) {
-				this.addMessage(sentence, 'incoming');
 				if (!silent) {
-					this.assistant.say(sentence);
+					this.assist(`repeat after me ${sentence}`);
 				} else {
 					this.emit('ready');
 				}
 			}
 		}, 1000 * delay);
-	}
-
-	ask(question) {
-		return new Promise((resolve) => {
-			console.log('starting ask....', question);
-			if (this.state === 0) this.stop();
-			if (question) {
-				this.addMessage(question, 'incoming', true);
-				this.assistant.once('end', () => {
-					console.log('question ended.');
-					this.player.once('waiting', () => {
-						console.log('waiting for response...');
-						this.assistant.removeAllListeners('speech-results').on('speech-results', (results) => {
-							if (results && results.length) {
-								console.info('ASK - Speech Results', results);
-								if (results.length === 1 && results[0].stability === 1) {
-									this.addMessage(results[0].transcript, 'outgoing');
-									Window.Store.state.assistant.speechTextBuffer = [];
-									this.microphone.enabled = false;
-									console.log('executing response after session.');
-									this.assistant.once('end', () => {
-										console.log('ready for response...');
-										resolve(results[0].transcript);
-									});
-									this.forceStop();
-								} else {
-									Window.Store.state.assistant.speechTextBuffer = results;
-								}
-							}
-						});
-						this.assist();
-					});
-				});
-				this.assistant.say(question);
-			}
-		});
-	}
-
-	/**
-	 * Adds a message to the global assistant store to display in the UI
-	 *
-	 * @param string text
-	 * @param string type
-	 */
-	addMessage(text, type, followup = false) {
-		this.command = null;
-		const message = this.processMessage(text, type, followup);
-		store.commit('addMessage', message);
-		return message;
-	}
-
-	// [TODO]: Move processing of messages to another class?
-	/**
-	 * Processes & formats an incoming message from the assistant into a proper output.
-	 *
-	 * @param {*} text
-	 * @param {*} type
-	 */
-	processMessage(text, type, followup = false) {
-		const message = { text, type, followup };
-
-		if (type !== 'incoming' || followup) {
-			return message;
-		}
-
-		const returnMessage = this.textFilters.getMessage(text);
-		console.log(returnMessage);
-		return returnMessage;
 	}
 
 	playPing() {
@@ -214,34 +159,16 @@ export default class Assistant extends EventEmitter {
 	 * @param {*} inputQuery
 	 */
 	assist(inputQuery = null) {
-		// this.player.reset();
 		if (inputQuery) {
 			this.emit('waiting');
-			this.addMessage(inputQuery, 'outgoing', true);
 			if (!this.runCommand(inputQuery)) {
 				Configuration.assistant.textQuery = inputQuery;
-				this.assistant.start(Configuration.assistant, this.startConversation);
+				this.assistant.start(Configuration.assistant);
 			}
 		} else {
 			this.emit('loading');
 			Configuration.assistant.textQuery = undefined;
-			this.assistant.start(Configuration.assistant, this.startConversation);
-		}
-	}
-
-	/**
-	 * Sets the mini mode for the assistant.
-	 * @param {*} enabled
-	 */
-	setMiniMode(enabled) {
-		if (enabled && !this.miniMode) {
-			this.miniMode = true;
-			ipcRenderer.send('mini-mode', true);
-			this.emit('mini-mode', true);
-		} else if (!enabled && this.miniMode) {
-			this.miniMode = false;
-			ipcRenderer.send('mini-mode', false);
-			this.emit('mini-mode', false);
+			this.assistant.start(Configuration.assistant);
 		}
 	}
 
@@ -280,17 +207,16 @@ export default class Assistant extends EventEmitter {
 	}
 
 	/** Stops the microphone output and plays what's left in the buffer (if any) */
-	stop() {
-		this.microphone.enabled = false;
-		this.player.play();
-	}
-
-	/** Force stops the assistant & audio and it's connection to Google. */
-	forceStop() {
-		console.log('Force stopping the assistant & players...');
-		this.assistant.stop();
-		this.microphone.enabled = false;
-		this.player.stop();
+	stopConversation(forceStop = false) {
+		if (this.converation) {
+			this.conversation.stop();
+			if (forceStop) {
+				this.player.reset();
+				this.microphone.enabled = false;
+				return;
+			}
+			this.player.play();
+		}
 	}
 
 	/**
@@ -306,22 +232,7 @@ export default class Assistant extends EventEmitter {
 		this.assistant.on('error', (error) => {
 			console.log('Assistant Error:', error);
 		});
-	}
 
-	onSpeechResults(results) {
-		console.log('Speech Results:', results);
-		if (results && results.length) {
-			console.info('Speech Results', results);
-			if (results.length === 1 && results[0].stability === 1) {
-				this.addMessage(results[0].transcript, 'outgoing', false);
-				Window.Store.state.assistant.speechTextBuffer = [];
-				this.runCommand(results[0].transcript, true);
-				this.microphone.enabled = false;
-				this.emit('waiting');
-			} else {
-				Window.Store.state.assistant.speechTextBuffer = results;
-			}
-			this.emit('new-text');
-		}
+		this.assistant.on('started', this.startConversation);
 	}
 }
