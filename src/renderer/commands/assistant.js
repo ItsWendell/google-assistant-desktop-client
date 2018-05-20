@@ -14,9 +14,11 @@ export default [
 			'talk',
 			'let\'s talk',
 			'I\'m bored',
+			'say something',
 		],
 		action: () => {
 			Window.Assistant.ask('What do you wanna talk about?').then((answer) => {
+				console.log('Resolved the answer: ', answer);
 				Window.Assistant.say(`Alright, let's talk about ${answer}`);
 			});
 		},

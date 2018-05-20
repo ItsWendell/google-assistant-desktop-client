@@ -23,7 +23,7 @@ export default class Commands extends EventEmitter {
 			commandBuffer = commandBuffer.concat(files(key).default);
 		});
 		this.commands = commandBuffer;
-		// this.artyom.addCommands(this.commands);
+		this.artyom.addCommands(this.commands);
 		this.emit('ready');
 	}
 
