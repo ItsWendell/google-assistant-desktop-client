@@ -38,13 +38,24 @@ export default class Assistant extends EventEmitter {
 		});
 
 		this.startConversation = (conversation) => {
+			this.conversation = conversation;
+			console.log('[Assistant SDK]', 'Starting conversation...');
+
+			console.log(
+				'Starting conversation, type: ',
+				Configuration.assistant.textQuery ? 'textQuery' : 'voice input',
+				Configuration.assistant.textQuery,
+			);
+
 			if (Configuration.assistant.textQuery === undefined) {
 				this.emit('listening');
 				this.microphone.enabled = true;
 			}
 
 			conversation.on('audio-data', (data) => {
-				// console.log('incoming audio buffer...', data);
+				if (this.disableOutput) return;
+
+				console.log('incoming audio buffer...');
 				this.player.appendBuffer(Buffer.from(data));
 			});
 
@@ -60,19 +71,23 @@ export default class Assistant extends EventEmitter {
 			conversation.on('transcription', ({ transcription, done }) => {
 				console.log('Transcription: ', transcription, done);
 				if (done) {
-					this.microphone.enabled = false;
 					this.emit('waiting');
+					this.microphone.enabled = false;
+					this.runCommand(transcription);
 				}
 			});
 
 			conversation.on('response', (text) => {
+				if (this.disableOutput) return;
 				console.log('Response: ', text);
 			});
 
-			conversation.on('screen-data', (data) => {
-				switch (data.format) {
+			conversation.on('screen-data', ({ format, data }) => {
+				if (this.disableOutput) return;
+
+				switch (format) {
 				case 'HTML':
-					this.updateResponseWindow(data.data.toString());
+					this.updateResponseWindow(data.toString());
 					break;
 				default:
 					console.log('Error: unknown data format.');
@@ -80,7 +95,9 @@ export default class Assistant extends EventEmitter {
 			});
 
 			conversation.on('ended', (error = undefined, followOn = false) => {
+				console.debug('[Assistant SDK]', 'Conversation ended...');
 				this.followOn = !Configuration.assistant.textQuery ? followOn : false;
+				Configuration.assistant.textQuery = undefined;
 
 				if (error) {
 					console.log('Conversation error', error);
@@ -88,15 +105,13 @@ export default class Assistant extends EventEmitter {
 
 				this.emit('ready');
 			});
-
-			this.conversation = conversation;
 		};
 
 		/** Registers if we need to follow on the input we've given */
 		this.followOn = false;
 
 		/** Store if current action is a command */
-		this.command = false;
+		this.disableOutput = false;
 
 		this.player.on('ready', () => console.log('Audio player ready...'));
 
@@ -129,22 +144,60 @@ export default class Assistant extends EventEmitter {
 		this.emit('responseHtml', html);
 	}
 
+	ask(question) {
+		return new Promise((resolve) => {
+			console.log('[Assistant Client]', 'Starting ask:', question);
+			if (question) {
+				this.assistant.once('started', () => {
+					this.conversation.once('ended', () => {
+						console.log('[Assistant Client] Question asked, waiting until audio output is finished...');
+						this.player.once('waiting', () => {
+							console.log('[Assistant Client]', 'Audio output finished, waiting for answer...');
+							// Checking if response expected is from text input or audio input!!
+							if (Configuration.assistant.textQuery) {
+								// Expecting Text Input[Assistant Client]
+								console.log('[Assistant Client]', 'Text question response not supported yet!');
+								return;
+							}
+							this.microphone.enabled = true;
+							this.assist();
+							this.conversation.removeAllListeners('transcription')
+								.on('transcription', ({ transcription, done }) => {
+									this.disableOutput = true;
+									console.info('[Assistant Client] Answer - Speech Results:', transcription);
+									if (done) {
+										console.info('[Assistant Client] Final Answer:', transcription);
+										this.disableOutput = false;
+										this.stopConversation(true).then(() => {
+											resolve(transcription);
+										});
+									}
+								});
+						});
+					});
+				});
+				this.disableOutput = false;
+				this.microphone.enabled = false;
+				this.say(question);
+			}
+		});
+	}
+
 	/**
 	 * Let's the Google Assistant say a given sentence.
 	 *
 	 * @param string sentence
 	 * @param int Delay in seconds
 	 */
-	say(sentence, delay = 0, silent = false) {
+	say(sentence, delay = 0) {
+		console.log('[Assistant Client]', 'Saying:', sentence);
 		setTimeout(() => {
-			this.stopConversation();
-			if (sentence) {
-				if (!silent) {
-					this.assist(`repeat after me ${sentence}`);
-				} else {
-					this.emit('ready');
-				}
-			}
+			this.stopConversation(true).then(() => {
+				console.log('[Assistant Client]', 'Saying:', sentence);
+				this.disableOutput = false;
+				this.microphone.enabled = false;
+				this.assist(`repeat after me ${sentence}`, false);
+			});
 		}, 1000 * delay);
 	}
 
@@ -158,13 +211,16 @@ export default class Assistant extends EventEmitter {
 	 *
 	 * @param {*} inputQuery
 	 */
-	assist(inputQuery = null) {
+	assist(inputQuery = null, checkCommands = true) {
 		if (inputQuery) {
 			this.emit('waiting');
-			if (!this.runCommand(inputQuery)) {
-				Configuration.assistant.textQuery = inputQuery;
-				this.assistant.start(Configuration.assistant);
+			if (checkCommands) {
+				if (this.runCommand(inputQuery)) {
+					return;
+				}
 			}
+			Configuration.assistant.textQuery = inputQuery;
+			this.assistant.start(Configuration.assistant);
 		} else {
 			this.emit('loading');
 			Configuration.assistant.textQuery = undefined;
@@ -182,23 +238,22 @@ export default class Assistant extends EventEmitter {
 		const command = this.commands.findCommand(textQuery);
 		if (command) {
 			console.log('Command found.', command);
-			this.command = command;
 			if (!queueCommand) {
-				console.log('executing command directly.');
-				if (Commands.run(this.command)) {
+				console.log('[Commands] Executing command...');
+				if (Commands.run(command)) {
 					console.log('executing command done.');
 					this.emit('ready');
 				}
 			} else {
 				console.log('executing command after session.');
-				this.assistant.once('end', () => {
+				this.conversation.once('ended', () => {
 					console.log('ready for command...');
-					if (Commands.run(this.command)) {
+					if (Commands.run(command)) {
 						console.log('command finished!');
 						this.emit('ready');
 					}
 				});
-				this.forceStop();
+				this.stopConversation(true);
 			}
 			return true;
 		}
@@ -208,15 +263,28 @@ export default class Assistant extends EventEmitter {
 
 	/** Stops the microphone output and plays what's left in the buffer (if any) */
 	stopConversation(forceStop = false) {
-		if (this.converation) {
-			this.conversation.stop();
+		return new Promise((resolve) => {
+			console.log('[Assistant Client]', 'Stopping conversation...');
+
+			this.microphone.enabled = false;
+			this.disableOutput = forceStop ? true : this.disableOutput;
+
+			if (!this.conversation) resolve();
+
+			this.conversation.once('ended', () => {
+				console.log('[Assistant Client]', 'Conversation stopped...');
+				this.conversation = undefined;
+				resolve();
+			});
+
 			if (forceStop) {
 				this.player.reset();
-				this.microphone.enabled = false;
-				return;
+			} else {
+				this.player.play();
 			}
-			this.player.play();
-		}
+
+			this.conversation.end();
+		});
 	}
 
 	/**
@@ -226,11 +294,12 @@ export default class Assistant extends EventEmitter {
 	authenticate() {
 		this.assistant = new GoogleAssistant(Configuration.auth);
 		this.assistant.on('ready', () => {
+			console.log('[Assistant SDK]', 'Ready...');
 			this.emit('ready');
 		});
 
 		this.assistant.on('error', (error) => {
-			console.log('Assistant Error:', error);
+			console.log('[Assistant SDK]', error);
 		});
 
 		this.assistant.on('started', this.startConversation);
