@@ -50,6 +50,7 @@ export default class Assistant extends EventEmitter {
 
 			conversation.on('end-of-utterance', () => {
 				this.microphone.enabled = false;
+				this.emit('waiting');
 			});
 
 			conversation.on('device-action', (data) => {
@@ -58,6 +59,10 @@ export default class Assistant extends EventEmitter {
 
 			conversation.on('transcription', ({ transcription, done }) => {
 				console.log('Transcription: ', transcription, done);
+				if (done) {
+					this.microphone.enabled = false;
+					this.emit('waiting');
+				}
 			});
 
 			conversation.on('response', (text) => {
@@ -74,10 +79,8 @@ export default class Assistant extends EventEmitter {
 				}
 			});
 
-			conversation.on('ended', (error = undefined, followUp = false) => {
-				if (followUp && !Configuration.assistant.textQuery) {
-					this.assist();
-				}
+			conversation.on('ended', (error = undefined, followOn = false) => {
+				this.followOn = !Configuration.assistant.textQuery ? followOn : false;
 
 				if (error) {
 					console.log('Conversation error', error);
@@ -106,6 +109,8 @@ export default class Assistant extends EventEmitter {
 
 		this.microphone.on('ready', () => console.log('Microphone ready...'));
 
+		// Event for when the assistant stopped talking
+		this.player.on('waiting', () => this.onAssistantFinishedTalking());
 		/** Registering events for registered services */
 	}
 
@@ -115,18 +120,13 @@ export default class Assistant extends EventEmitter {
 		if (this.followOn) {
 			console.log('Follow on required.');
 			this.followOn = false;
-			this.reset();
+			this.stopConversation();
+			this.assist();
 		}
 	}
 
 	updateResponseWindow(html) {
 		this.emit('responseHtml', html);
-	}
-
-	/** Stops the assistant and starts directly a new assist / conversation */
-	reset() {
-		this.stop();
-		this.assist();
 	}
 
 	/**
