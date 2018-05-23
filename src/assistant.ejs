@@ -6,6 +6,7 @@
     <% if (htmlWebpackPlugin.options.nodeModules) { %>
       <!-- Add `node_modules/` to global paths so `require` works properly in development -->
       <script>
+				Window.isAssistant = true;
 				var module = require('module');
 				var path = require('path');
         module.globalPaths.push('<%= htmlWebpackPlugin.options.nodeModules.replace(/\\/g, '\\\\') %>')

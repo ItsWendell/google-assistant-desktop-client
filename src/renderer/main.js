@@ -28,29 +28,22 @@ Vue.config.productionTip = false;
 
 Window.Store = store;
 
-Window.Spotify = new SpotifyClient();
+if(Window.isAssistant) {
+	Window.Spotify = new SpotifyClient();
 
-/* eslint-disable no-new */
-const assistantWindow = new Vue({
-	components: { AssistantWindow },
-	store,
-	el: '#assistant',
-	template: '<AssistantWindow />',
-});
+	Window.AssistantWindow = new Vue({
+		components: { AssistantWindow },
+		store,
+		el: '#assistant',
+		template: '<AssistantWindow />',
+	});
+}
 
-/* eslint-disable no-new */
-const responseWindow = new Vue({
-	components: { ResponseWindow },
-	store,
-	el: '#response',
-	template: '<ResponseWindow />',
-});
-
-
-Window.AssistantWindow = assistantWindow;
-
-Window.AssistantWindow.$mount('#assistant');
-
-Window.ResponseWindow = responseWindow;
-
-Window.ResponseWindow.$mount('#response');
+if(Window.isResponse) {
+	Window.ResponseWindow = new Vue({
+		components: { ResponseWindow },
+		store,
+		el: '#response',
+		template: '<ResponseWindow />',
+	});
+}
