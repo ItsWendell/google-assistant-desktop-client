@@ -1,29 +1,20 @@
 # Google Assistant for Desktop
 
-This is a new version of the Google Assistant Desktop Client - this version is using the HTML5 screen output from the Google Assistant service.
+Google Assistant for Desktop is an cross-platform assistant powered by the Google Assistant SDK, it has support for the official HTML5 screen output.
 
 ![Screenshot of Google Assistant Desktop Client](/screenshots/screenshot-3.JPG?raw=true "Full html5 window preview")
-
-This branch is still under development but wanted it to get it out there, it still needs a lot of refactoring and fixing compability with 'endoplasmic/google-assistant' node library since we switched in this version to this libary as a base for the assistant.
-
-This application is still a w.i.p.
-
-We've also updated Electron to version 2.0 and all other NPM packages to the newest version which grealy improved speed and stability overall.
 
 ## Features
 * Google Assistant SDK v1alpha2
 * 'Transparent' HTML5 screen output overlay
-* Suggestions are clickable
-* Screen auto-hides after x seconds depending on the output
-* Seperate screen for text-input and voice trigger
+* Develop your own commands, trigger ```ask(question) // Promise``` or ```say(query)``` functions to let the assistant do whatever you want.
+* Build in basic Spotify Web API support as a demo.
 
 ## TODO
-* Refactor custom command to 'endoplasmic/google-assistant'
-* Only manual text input works for now, I need to fix the voice input for the new library.
-* Fix Spotify Controls
-* Look into 'Device Actions' for general custom commands
-* Update README to include other packages used
-* Update configuration notes
+* Update README configuration steps for key generation and creating basic commands yourself.
+
+### NOTE
+This assistant desktop app is made for developers and hackers alike who like to play around with the SDK's and software. It will probably never be released as a stand-alone app that you can download since Google will probably never give us production API keys for a desktop client.
 
 ## Configuration
 There's a couple of things that need to be done in order to run this application properly.
@@ -42,19 +33,21 @@ After you've got your client_secret_<client-id>.json file rename it to client_se
 npm install (--target=2.0.0 --runtime=electron)
 
 # serve with hot reload at localhost:9080
-npm run dev
+npm start # OR npm run hot
 
 # build electron application for production
 # This is might not work properly yet for some platforms.
 npm run build
-
-# lint all JS/Vue component files in `src/`
-npm run lint
 
 ```
 
 ## Used Libraries / Boilerplates
 
 * [Google Assistant (A node.js implementation of the Google Assistant SDK)](https://github.com/endoplasmic/google-assistant)
+** Connection to the Google Assistant SDK Service
+* [A Node.js wrapper for Spotify's Web API](https://github.com/thelinmichael/spotify-web-api-node)
+** Used for integrating custom commands for Spotify
+* [A voice control - voice commands - speech recognition and speech synthesis javascript library.](https://github.com/sdkcarlos/artyom.js)
+** Used for text processing custom voice commands (The Google Assistant SDK does the actual transcription)
 
 ---
