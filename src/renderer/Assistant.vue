@@ -57,6 +57,7 @@ export default {
 	},
 	mounted() {
 		ipcRenderer.on('start-assistant', () => {
+			Window.Assistant.player.playPing();
 			this.assist();
 		});
 		setTimeout(() => {
