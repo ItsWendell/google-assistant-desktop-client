@@ -31,6 +31,7 @@ export default class Player extends EventEmitter {
 	 */
 	setup() {
 		this.audioPlayer.addEventListener('waiting', () => {
+			console.log('[Audio Player] Player is waiting on data...');
 			this.emit('waiting');
 		});
 
@@ -89,6 +90,7 @@ export default class Player extends EventEmitter {
 	 */
 	stop() {
 		this.audioQueue = [];
+		this.audioPlayer.src = '';
 		this.reset();
 	}
 
@@ -96,12 +98,5 @@ export default class Player extends EventEmitter {
 		const pingPlayer = new Audio('static/ping.mp3');
 		pingPlayer.play();
 		this.emit('ping');
-	}
-
-	/**
-	 * Pauses the audioPlayer
-	 */
-	pause() {
-		this.audioPlayer.pause();
 	}
 }
