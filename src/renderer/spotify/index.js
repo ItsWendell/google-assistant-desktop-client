@@ -11,40 +11,42 @@ import config from '@/config';
 export default class SpotifyClient extends EventEmitter {
 	constructor() {
 		super();
-		this.spotifyClient = new SpotifyAPIClient(config.spotify.client);
-		this.scopes = config.spotify.scopes;
-		this.authenticationCode = '';
-	}
-
-	authenticate() {
-		// [TODO]: Load saved tokens and use refresh token to get new tokens?
-		this.spotifyAuthenticate();
-	}
-
-	spotifyAuthenticate() {
-		this.authenticateApp().then((code) => {
-			this.processAuthentication(code);
-		}).catch((err) => {
-			this.emit('unauthenticated', err);
+		this.spotifyClient = new SpotifyAPIClient({
+			clientId: config.spotify.clientId,
+			clientSecret: config.spotify.clientSecret,
+			redirectURri: config.spotify.redirectUri,
 		});
+		this.scopes = config.spotify.scopes;
 	}
 
-	processAuthentication(code) {
+	/**
+	 * Fetches the tokens and saves them.
+	 *
+	 * @param {String} code
+	 */
+	handleAuthorization(code) {
 		this.spotifyClient.authorizationCodeGrant(code)
-			.then((data) => {
-				console.log('The token expires in', data.body.expires_in);
-				console.log('The access token is', data.body.access_token);
-				console.log('The refresh token is', data.body.refresh_token);
-				this.saveTokens(data.body);
-				this.emit('authenticated', data.body);
+			.then(({ body: tokens }) => {
+				this.spotifyClient.setAccessToken(tokens.access_token);
+				this.spotifyClient.setRefreshToken(tokens.refresh_token);
+				console.debug('The token expires in', tokens.expires_in);
+				console.debug('The access token is', tokens.access_token);
+				console.debug('The refresh token is', tokens.refresh_token);
+				this.saveTokens(tokens);
+				this.emit('authenticated', tokens);
 			}, (err) => {
 				this.emit('error', err);
 			});
 	}
 
-	saveTokens(tokens) {
-		this.spotifyClient.setAccessToken(tokens.access_token);
-		this.spotifyClient.setRefreshToken(tokens.refresh_token);
+	/**
+	 * Saves the tokens from the included spotify web api client.
+	 */
+	saveTokens() {
+		const tokens = {
+			access_token: this.spotifyClient.getAccessToken(),
+			refresh_token: this.spotifyClient.getRefreshToken(),
+		};
 		mkdirp(path.dirname(config.spotify.savedTokensPath), () => {
 			fs.writeFile(config.spotify.savedTokensPath, JSON.stringify(tokens), (err) => {
 				if (!err) {
@@ -56,28 +58,63 @@ export default class SpotifyClient extends EventEmitter {
 		});
 	}
 
-	authenticateApp() {
+	requestAuthorizationCode() {
 		const { BrowserWindow } = remote;
-		const authURL = this.spotifyClient.createAuthorizeURL(this.scopes, 'login');
+		const authenticationUrl = this.spotifyClient.createAuthorizeURL(this.scopes);
+
+		console.debug('[Spotify Client] Requesting Authorization code...', authenticationUrl);
+
 		return new Promise((resolve, reject) => {
-			const win = new BrowserWindow({ 'use-content-size': true });
+			const win = new BrowserWindow({
+				webPreferences: {
+					nodeIntegration: false,
+					webSecurity: false,
+				},
+			});
 
 			win.webContents.on('closed', () => {
 				reject(new Error('User closed the window'));
 			});
 
+			/** Detect redirects to find the code parameter for RedirectUri */
 			win.webContents.on('did-get-redirect-request', (event, oldURL, newURL) => {
+				console.log('[Spotify Client] Found redirection in BrowserWindow.');
+				console.log('[Spotify Client] From:', oldURL, '| To:', newURL);
+
+				/** Only process the url when we find the url that starts with our redirectUri */
+				if (!newURL.startsWith(config.spotify.client.redirectUri)) {
+					return;
+				}
+
 				const url = new URL(newURL);
-				console.log('redirect urls', oldURL, newURL);
+
 				const code = url.searchParams.get('code');
+
+
 				if (code) {
 					setImmediate(() => win.close());
 					win.webContents.removeAllListeners('closed');
-					console.log('Code found', code);
+					console.log('[Spotify Client] Code found', code);
 					resolve(code);
+				} else {
+					reject(new Error(`No token found at redirectUri ${newURL}`));
 				}
 			});
-			win.loadURL(authURL);
+			win.loadURL(authenticationUrl);
+		});
+	}
+
+	authenticate() {
+		// [TODO]: Load saved tokens and use refresh token to get new tokens?
+		console.debug('[Spotify Client] Authenticating current user...');
+		this.requestAuthorizationCode().then((code) => {
+			this.handleAuthorization(code).then(() => {
+				this.handleAuthorization(code);
+			}).catch((err) => {
+				this.emit('unauthenticated', err);
+			});
+		}).catch((err) => {
+			this.emit('unauthenticated', err);
 		});
 	}
 
