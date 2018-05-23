@@ -10,11 +10,20 @@ Google Assistant for Desktop is an cross-platform assistant powered by the Googl
 * Develop your own commands, trigger ```ask(question) // Promise``` or ```say(query)``` functions to let the assistant do whatever you want.
 * Build in basic Spotify Web API support as a demo.
 
+### Shortcut
+Since hotword integration is not included yet, I've included a shortcut that triggers the assistant: 
+
+* Windows: Ctrl+Alt+A
+* Mac OS: Control+Option+A
+
+You'll hear a sound when you can start speaking almost instantly.
+
+#### NOTE
+This assistant desktop app is made for developers and hackers alike who like to play around with the SDK's and software. It will probably never be released as a stand-alone app that you can download since Google will probably never give us production API keys for a desktop client.
+
 ## TODO
 * Update README configuration steps for key generation and creating basic commands yourself.
 
-### NOTE
-This assistant desktop app is made for developers and hackers alike who like to play around with the SDK's and software. It will probably never be released as a stand-alone app that you can download since Google will probably never give us production API keys for a desktop client.
 
 ## Configuration
 There's a couple of things that need to be done in order to run this application properly.
