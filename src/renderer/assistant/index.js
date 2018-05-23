@@ -26,7 +26,11 @@ export default class Assistant extends EventEmitter {
 		/** The assistant library we use to process everything and connect to Google */
 		this.assistant = undefined;
 
-		this.responseWindow = undefined;
+		/** Expecting an response window */
+		this.textAskResponse = undefined;
+
+		/** Check if last input was a textQuery */
+		this.lastAssistTextQuery = undefined;
 
 		this.conversation = undefined;
 
@@ -97,13 +101,13 @@ export default class Assistant extends EventEmitter {
 			conversation.on('ended', (error = undefined, followOn = false) => {
 				console.debug('[Assistant SDK]', 'Conversation ended...');
 				this.followOn = !Configuration.assistant.textQuery ? followOn : false;
-				Configuration.assistant.textQuery = undefined;
 
 				if (error) {
 					console.log('Conversation error', error);
 				}
 
 				this.emit('ready');
+				this.conversation = undefined;
 			});
 		};
 
@@ -150,18 +154,21 @@ export default class Assistant extends EventEmitter {
 			if (question) {
 				this.assistant.once('started', () => {
 					this.conversation.once('ended', () => {
-						console.log('[Assistant Client] Question asked, waiting until audio output is finished...');
-						this.player.once('waiting', () => {
-							console.log('[Assistant Client]', 'Audio output finished, waiting for answer...');
-							// Checking if response expected is from text input or audio input!!
-							if (Configuration.assistant.textQuery) {
-								// Expecting Text Input[Assistant Client]
-								console.log('[Assistant Client]', 'Text question response not supported yet!');
-								return;
-							}
-							this.microphone.enabled = true;
-							this.assist();
-							this.conversation.removeAllListeners('transcription')
+						if (Configuration.assistant.textQuery) {
+							console.log('[Assistant Client] Question asked, waiting for textQuery...');
+							this.textAskResponse = true;
+							this.once('ask-response', (response) => {
+								Configuration.assistant.textQuery = undefined;
+								console.debug('[Assistant Client] Ask Text Response Received:', response);
+								this.textAskResponse = false;
+								resolve(response);
+							});
+						} else {
+							this.player.once('waiting', () => {
+								console.log('[Assistant Client]', 'Audio output finished, waiting for answer...');
+								this.microphone.enabled = true;
+								this.assist();
+								this.conversation.removeAllListeners('transcription')
 								.on('transcription', ({ transcription, done }) => {
 									this.disableOutput = true;
 									console.info('[Assistant Client] Answer - Speech Results:', transcription);
@@ -173,7 +180,8 @@ export default class Assistant extends EventEmitter {
 										});
 									}
 								});
-						});
+							});
+						}
 					});
 				});
 				this.disableOutput = false;
@@ -214,6 +222,10 @@ export default class Assistant extends EventEmitter {
 	assist(inputQuery = null, checkCommands = true) {
 		if (inputQuery) {
 			this.emit('waiting');
+			if (this.textAskResponse) {
+				this.emit('ask-response', inputQuery);
+				return;
+			}
 			if (checkCommands) {
 				if (this.runCommand(inputQuery)) {
 					return;
