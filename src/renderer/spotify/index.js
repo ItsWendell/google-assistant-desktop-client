@@ -14,7 +14,7 @@ export default class SpotifyClient extends EventEmitter {
 		this.spotifyClient = new SpotifyAPIClient({
 			clientId: config.spotify.clientId,
 			clientSecret: config.spotify.clientSecret,
-			redirectURri: config.spotify.redirectUri,
+			redirectUri: config.spotify.redirectUri,
 		});
 		this.scopes = config.spotify.scopes;
 	}
@@ -82,7 +82,7 @@ export default class SpotifyClient extends EventEmitter {
 				console.log('[Spotify Client] From:', oldURL, '| To:', newURL);
 
 				/** Only process the url when we find the url that starts with our redirectUri */
-				if (!newURL.startsWith(config.spotify.client.redirectUri)) {
+				if (!newURL.startsWith(config.spotify.redirectUri)) {
 					return;
 				}
 
@@ -125,6 +125,15 @@ export default class SpotifyClient extends EventEmitter {
 			}, (err) => {
 				reject(err);
 			});
+		});
+	}
+
+	searchTrack(searchTerm) {
+		this.spotifyClient.searchTracks(searchTerm)
+		.then((data) => {
+			console.log('Results for search term; ', data.body);
+		}, (err) => {
+			console.error(err);
 		});
 	}
 

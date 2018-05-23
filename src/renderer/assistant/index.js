@@ -1,6 +1,8 @@
 // eslint-disable-next-line
 import { ipcRenderer, remote } from 'electron';
 import { EventEmitter } from 'events';
+import opn from 'opn';
+
 import GoogleAssistant from 'google-assistant';
 
 import Configuration from '@/config';
@@ -38,6 +40,8 @@ export default class Assistant extends EventEmitter {
 			console.log('Message from childeren:', message, event);
 			if (message.query) {
 				this.assist(message.query.queryText);
+			} else if (message.url && message.url.href) {
+				opn(message.url.href);
 			}
 		});
 
@@ -90,9 +94,12 @@ export default class Assistant extends EventEmitter {
 				if (this.disableOutput) return;
 
 				switch (format) {
-				case 'HTML':
-					this.updateResponseWindow(data.toString());
+				case 'HTML': {
+					let html = data.toString();
+					html = html.replace('You said:', ''); // NOTE: Fix for saying output html.
+					this.updateResponseWindow(html);
 					break;
+				}
 				default:
 					console.log('Error: unknown data format.');
 				}
@@ -100,6 +107,7 @@ export default class Assistant extends EventEmitter {
 
 			conversation.on('ended', (error = undefined, followOn = false) => {
 				console.debug('[Assistant SDK]', 'Conversation ended...');
+				this.player.play();
 				this.followOn = !Configuration.assistant.textQuery ? followOn : false;
 
 				if (error) {
@@ -130,12 +138,14 @@ export default class Assistant extends EventEmitter {
 
 		// Event for when the assistant stopped talking
 		this.player.on('waiting', () => this.onAssistantFinishedTalking());
+		this.player.audioPlayer.addEventListener('ended', () => console.log('[Audio Player] Ended playing...'));
+
 		/** Registering events for registered services */
 	}
 
 	/** Triggers when the audio player has stopped playing audio. */
 	onAssistantFinishedTalking() {
-		console.log('Google Assistant audio stopped.');
+		console.log('[Assistant Client] Player is done talking?');
 		if (this.followOn) {
 			console.log('Follow on required.');
 			this.followOn = false;
@@ -198,10 +208,13 @@ export default class Assistant extends EventEmitter {
 	 * @param int Delay in seconds
 	 */
 	say(sentence, delay = 0) {
-		console.log('[Assistant Client]', 'Saying:', sentence);
+		console.log('[Assistant Client]', `Manually saying: ${sentence}...`);
 		setTimeout(() => {
 			this.stopConversation(true).then(() => {
-				console.log('[Assistant Client]', 'Saying:', sentence);
+				console.log(
+					'[Assistant Client]',
+					`Sending manual sentence (${sentence}) to Google Assistant for voice...`,
+				);
 				this.disableOutput = false;
 				this.microphone.enabled = false;
 				this.assist(`repeat after me ${sentence}`, false);
@@ -220,6 +233,7 @@ export default class Assistant extends EventEmitter {
 	 * @param {*} inputQuery
 	 */
 	assist(inputQuery = null, checkCommands = true) {
+		this.player.stop();
 		if (inputQuery) {
 			this.emit('waiting');
 			if (this.textAskResponse) {
@@ -249,6 +263,7 @@ export default class Assistant extends EventEmitter {
 		console.log('Checking if"', textQuery, '"is a command.');
 		const command = this.commands.findCommand(textQuery);
 		if (command) {
+			this.disableOutput = true;
 			console.log('Command found.', command);
 			if (!queueCommand) {
 				console.log('[Commands] Executing command...');
@@ -281,6 +296,12 @@ export default class Assistant extends EventEmitter {
 			this.microphone.enabled = false;
 			this.disableOutput = forceStop ? true : this.disableOutput;
 
+			if (forceStop) {
+				this.player.stop();
+			} else {
+				this.player.play();
+			}
+
 			if (!this.conversation) resolve();
 
 			this.conversation.once('ended', () => {
@@ -288,12 +309,6 @@ export default class Assistant extends EventEmitter {
 				this.conversation = undefined;
 				resolve();
 			});
-
-			if (forceStop) {
-				this.player.reset();
-			} else {
-				this.player.play();
-			}
 
 			this.conversation.end();
 		});

@@ -26,11 +26,9 @@ export default {
 		},
 	},
 	spotify: {
-		client: {
-			clientId: '84286ed53eaf4370b812263004b40c10',
-			clientSecret: 'a92ed06c4b0e413bb6ba39f0e21c1da6',
-			redirectUri: 'https://ga-desktop.local/callback',
-		},
+		clientId: '84286ed53eaf4370b812263004b40c10',
+		clientSecret: 'a92ed06c4b0e413bb6ba39f0e21c1da6',
+		redirectUri: 'https://ga-desktop.local/callback',
 		scopes: [
 			'user-read-private',
 			'user-read-email',

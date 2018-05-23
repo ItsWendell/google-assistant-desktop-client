@@ -9,11 +9,7 @@ export default [
 			'search * on youtube',
 			'find * on youtube'],
 		action: (i, wildcard) => {
-			let answer;
-			answer = 'Playing ';
-			answer += wildcard;
-			answer += ' on YouTube';
-			Window.Assistant.say(answer);
+			Window.Assistant.say(`Playing ${wildcard} on YouTube`);
 			opn('https://www.youtube.com/results?search_query='.concat(encodeURIComponent(wildcard)));
 		},
 	},

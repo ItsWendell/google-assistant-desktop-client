@@ -6,7 +6,11 @@ export default [
 			'login to spotify',
 		],
 		action: () => {
+			Window.Assistant.say('Login to spotify on your screen.');
 			Window.Spotify.authenticate();
+			Window.Spotify.once('authenticated', () => {
+				Window.Assistant.say('You succesfully logged into spotify!');
+			});
 		},
 	},
 	{
@@ -72,34 +76,6 @@ export default [
 				console.log(err);
 				Window.Assistant.say('Something went wrong getting information from Spotify, try \'spotify login\' to try again');
 			});
-		},
-	},
-	{
-		smart: true,
-		indexes: [
-			'play *',
-		],
-		action: (i, wildcard) => {
-			Window.Assistant
-				.ask(`Do you want to play the track, artist, album or playlist of ${wildcard}`).then((answer) => {
-					switch (answer) {
-					case 'track':
-						Window.Assistant.say(`Playing track ${wildcard}`);
-						break;
-					case 'artist':
-						console.log('play artist');
-						break;
-					case 'album':
-						console.log('play artist');
-						break;
-					case 'playlist':
-						console.log('play artist');
-						break;
-					default:
-						Window.Assistant.say('Please try again!');
-						break;
-					}
-				});
 		},
 	},
 ];
