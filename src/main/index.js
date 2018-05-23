@@ -184,7 +184,7 @@ function initializeApp() {
 }
 
 // NOTE: Setting a timeout here fixes the issues for linux transparency!
-app.on('ready', setTimeout(initializeApp, 100));
+app.on('ready', () => setTimeout(initializeApp, 100));
 
 app.on('window-all-closed', () => {
 	if (process.platform !== 'darwin') {
