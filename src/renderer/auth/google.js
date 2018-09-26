@@ -4,7 +4,7 @@
  */
 
 const { stringify } = require('querystring');
-const google = require('googleapis');
+const { google } = require('googleapis');
 const co = require('co');
 const fetch = require('node-fetch');
 // eslint-disable-next-line import/no-extraneous-dependencies

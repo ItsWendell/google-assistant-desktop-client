@@ -53,7 +53,9 @@ export default {
 		status: 'loading',
 	}),
 	computed: {
-		showActions: () => this.status !== 'loading',
+		showActions: function () {
+			return this.status !== 'loading'
+		},
 	},
 	mounted() {
 		ipcRenderer.on('start-assistant', () => {
@@ -132,33 +134,32 @@ export default {
 @import url("https://fonts.googleapis.com/css?family=Roboto:100,200,300,400,500,700|Material+Icons");
 
 #toolbar .btn .btn__content img {
-    width: 2rem;
+  width: 2rem;
 }
 
 #app,
 .application--wrap {
-	background-color: rgba(0, 0, 0, 0) !important;
-	background: rgba(0, 0, 0, 0) !important;
+  background-color: rgba(0, 0, 0, 0) !important;
+  background: rgba(0, 0, 0, 0) !important;
 }
 
 html {
-	overflow-y: hidden;
-	-webkit-app-region: drag;
+  overflow-y: hidden;
+  -webkit-app-region: drag;
 }
 
 #toolbar {
-	display: flex;
-    justify-content: center;
-    align-items: center;
-    align-content: center;
-    align-self: center;
-	flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  align-content: center;
+  align-self: center;
+  flex: 1;
 }
 
 #toolbar > .input-group {
-	padding: 0 !important;
-	background-color: transparent !important;
-	flex: 1;
+  padding: 0 !important;
+  background-color: transparent !important;
+  flex: 1;
 }
-
 </style>

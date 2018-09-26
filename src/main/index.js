@@ -9,11 +9,17 @@ import {
 import path from 'path';
 import os from 'os';
 
-/**
- * Set `__static` path to static files in production
- * @see https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-static-assets.html
- */
-if (process.env.NODE_ENV !== 'development') {
+if (process.env.NODE_ENV === 'development') {
+	try {
+		// eslint-disable-next-line
+		require('electron-debug')({
+			showDevTools: true,
+			showDevTools: 'undocked',
+		});
+	} catch (err) {
+		console.log('Failed to install `electron-debug`');
+	}
+} else {
 	global.__static = path.join(__dirname, '/static').replace(/\\/g, '\\\\');
 }
 
@@ -53,11 +59,11 @@ function setToolbarSize({ width, height }) {
 }
 
 const assistantURL = process.env.NODE_ENV === 'development'
-  ? 'http://localhost:9080/assistant.html'
+	? 'http://localhost:9080/assistant.html'
 	: `file://${__dirname}/assistant.html`;
 
 const responseURL = process.env.NODE_ENV === 'development'
-  ? 'http://localhost:9080/response.html'
+	? 'http://localhost:9080/response.html'
 	: `file://${__dirname}/response.html`;
 
 /**
@@ -173,6 +179,7 @@ function createWindows() {
 
 	assistantWindow.loadURL(assistantURL);
 	responseWindow.loadURL(responseURL);
+	assistantWindow.webContents.openDevTools();
 }
 
 
