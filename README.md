@@ -37,6 +37,10 @@ After you've got your client_secret_<client-id>.json file rename it to client_se
 
 ## Build Setup
 
+### prerequisites
+[ ] Python 2.7 installed and added to path
+[ ] on Windows: `npm i -g --production windows-build-tools`
+
 ``` bash
 # install dependencies
 npm install (--target=2.0.0 --runtime=electron)
