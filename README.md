@@ -6,7 +6,7 @@ Google Assistant for Desktop is an cross-platform assistant powered by the Googl
 
 ## Features
 * Google Assistant SDK v1alpha2
-* 'Transparent' HTML5 screen output overlay
+* "Transparent" HTML5 screen output overlay
 * Develop your own commands, trigger ```ask(question) // Promise``` or ```say(query)``` functions to let the assistant do whatever you want.
 * Build in basic Spotify Web API support as a demo.
 
