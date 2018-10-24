@@ -1,5 +1,5 @@
 /* eslint-disable */
-import 'babel-polyfill';
+import '@babel/polyfill';
 
 // eslint-disable-next-line
 import { ipcRenderer } from 'electron';
@@ -28,7 +28,7 @@ Vue.config.productionTip = false;
 
 Window.Store = store;
 
-if(Window.isAssistant) {
+if (Window.isAssistant) {
 	Window.Spotify = new SpotifyClient();
 
 	Window.AssistantWindow = new Vue({
@@ -39,7 +39,7 @@ if(Window.isAssistant) {
 	});
 }
 
-if(Window.isResponse) {
+if (Window.isResponse) {
 	Window.ResponseWindow = new Vue({
 		components: { ResponseWindow },
 		store,
