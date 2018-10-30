@@ -29,6 +29,8 @@ rules:
     - warn
     - 120
 
+  no-console: off
+
   no-undef: error
   no-unused-vars: error
 

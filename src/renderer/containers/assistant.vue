@@ -41,12 +41,12 @@
 <script>
 import { ipcRenderer } from 'electron';
 
-import Authentication from '@/auth';
-import Assistant from './assistant/index';
+import Authentication from '@/providers/authentication';
+import Assistant from '@/providers/assistant';
 
 export default {
 	name: 'AssistantWindow',
-	components: { },
+	components: {},
 	data: () => ({
 		inputQuery: '',
 		showTextField: false,
@@ -56,13 +56,14 @@ export default {
 		showActions: () => this.status !== 'loading',
 	},
 	mounted() {
+    // Listen for main process triggers to start the assistant.
 		ipcRenderer.on('start-assistant', () => {
 			Window.Assistant.player.playPing();
 			this.assist();
 		});
 		setTimeout(() => {
-			// boot up the entire app!
-				/** Registering global authenticator */
+      // boot up the entire app!
+      /** Registering global authenticator */
 			Window.Auth = new Authentication();
 			Window.Auth.once('authenticated', () => {
 				console.log('Authenticated, setup up Google Assistant...');
@@ -132,33 +133,32 @@ export default {
 @import url("https://fonts.googleapis.com/css?family=Roboto:100,200,300,400,500,700|Material+Icons");
 
 #toolbar .btn .btn__content img {
-    width: 2rem;
+  width: 2rem;
 }
 
 #app,
 .application--wrap {
-	background-color: rgba(0, 0, 0, 0) !important;
-	background: rgba(0, 0, 0, 0) !important;
+  background-color: rgba(0, 0, 0, 0) !important;
+  background: rgba(0, 0, 0, 0) !important;
 }
 
 html {
-	overflow-y: hidden;
-	-webkit-app-region: drag;
+  overflow-y: hidden;
+  -webkit-app-region: drag;
 }
 
 #toolbar {
-	display: flex;
-    justify-content: center;
-    align-items: center;
-    align-content: center;
-    align-self: center;
-	flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  align-content: center;
+  align-self: center;
+  flex: 1;
 }
 
 #toolbar > .input-group {
-	padding: 0 !important;
-	background-color: transparent !important;
-	flex: 1;
+  padding: 0 !important;
+  background-color: transparent !important;
+  flex: 1;
 }
-
 </style>

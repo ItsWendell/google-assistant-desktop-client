@@ -4,7 +4,7 @@ import fs from 'fs';
 import mkdirp from 'mkdirp';
 import path from 'path';
 import { auth as GoogleAuth } from 'googleapis';
-import ElectronGoogleOAuth from './google';
+import ElectronGoogleOAuth from './google-electron-auth';
 
 /**
  * OAuth2 Authenticator for Electron.

@@ -39,10 +39,12 @@ export default [
 				}
 			}).catch((err) => {
 				if (err.message && err.statusCode === 401) {
-					Window.Assistant.say('You\'re not logged in to Spotify, say or type \'login to spotify\' to login.');
+					Window.Assistant
+						.say('You\'re not logged in to Spotify, say or type \'login to spotify\' to login.');
 				} else {
 					console.log(err);
-					Window.Assistant.say('Something went wrong getting information from Spotify, try \'login to spotify\' to try again');
+					Window.Assistant
+						.say('Something went wrong, try \'login to spotify\' to try again');
 				}
 			});
 		},
@@ -60,7 +62,8 @@ export default [
 				Window.Assistant.say('Alright!', 0, true);
 			}).catch((err) => {
 				console.log(err);
-				Window.Assistant.say('Something went wrong getting information from Spotify, try \'login to spotify\' to try again');
+				Window.Assistant
+					.say('Something went wrong, try \'login to spotify\' to try again');
 			});
 		},
 	},
@@ -74,7 +77,7 @@ export default [
 				Window.Assistant.say('Enjoy!');
 			}).catch((err) => {
 				console.log(err);
-				Window.Assistant.say('Something went wrong getting information from Spotify, try \'spotify login\' to try again');
+				Window.Assistant.say('Something went wrong, try \'spotify login\' to try again');
 			});
 		},
 	},
