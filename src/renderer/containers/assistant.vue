@@ -53,7 +53,9 @@ export default {
 		status: 'loading',
 	}),
 	computed: {
-		showActions: () => this.status !== 'loading',
+		showActions() {
+			return this.status !== 'loading';
+		},
 	},
 	mounted() {
     // Listen for main process triggers to start the assistant.

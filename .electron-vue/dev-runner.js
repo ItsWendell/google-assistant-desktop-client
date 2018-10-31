@@ -79,7 +79,7 @@ function startRenderer() {
 
 function startMain() {
 	return new Promise((resolve, reject) => {
-		mainConfig.entry.main = [path.join(__dirname, '../src/main/index.dev.js')].concat(mainConfig.entry.main)
+		// mainConfig.entry.main = [path.join(__dirname, '../src/main/index.js')].concat(mainConfig.entry.main)
 
 		const compiler = webpack(mainConfig)
 
@@ -128,11 +128,12 @@ function startElectron() {
 	})
 }
 
-function electronLog(log, color) {
-	const data = log.toString().split(/\r?\n/).forEach(line => {
+function electronLog(data, color) {
+	let log = ''
+	data = data.toString().split(/\r?\n/)
+	data.forEach(line => {
 		log += `  ${line}\n`
-	});
-
+	})
 	if (/[0-9A-z]+/.test(log)) {
 		console.log(
 			chalk[color].bold('┏ Electron -------------------') +
@@ -144,7 +145,27 @@ function electronLog(log, color) {
 	}
 }
 
+function greeting() {
+	const cols = process.stdout.columns
+	let text = ''
+
+	if (cols > 104) text = 'Assistant|Desktop';
+	else if (cols > 76) text = 'Assistant-|Desktop'
+	else text = false
+
+	if (text) {
+		say(text, {
+			colors: ['yellow'],
+			font: 'simple',
+			space: false
+		})
+	} else console.log(chalk.yellow.bold('\n  electron-vue'))
+	console.log(chalk.blue('  getting ready...') + '\n')
+}
+
 function init() {
+	greeting()
+
 	Promise.all([startRenderer(), startMain()])
 		.then(() => {
 			startElectron()

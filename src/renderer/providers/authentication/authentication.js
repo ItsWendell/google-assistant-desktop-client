@@ -3,9 +3,10 @@ import config from '@/config';
 import fs from 'fs';
 import mkdirp from 'mkdirp';
 import path from 'path';
-import { auth as GoogleAuth } from 'googleapis';
+import { google } from 'googleapis';
 import ElectronGoogleOAuth from './google-electron-auth';
 
+const { OAuth2 } = google.auth;
 /**
  * OAuth2 Authenticator for Electron.
  *
@@ -16,7 +17,6 @@ export default class Authenticator extends EventEmitter {
 	constructor() {
 		super();
 
-		const { OAuth2 } = GoogleAuth;
 		this.OAuth2Client = new OAuth2(
 			config.auth.key.client_id,
 			config.auth.key.client_secret,
@@ -67,6 +67,7 @@ export default class Authenticator extends EventEmitter {
 			this.saveTokens(tokens);
 		}
 	}
+
 	/**
 	 * Opens a Google popup to authenticate.
 	 */

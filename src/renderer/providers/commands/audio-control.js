@@ -1,5 +1,3 @@
-import RobotJS from 'robotjs';
-
 export default [
 	{
 		smart: false,
@@ -17,8 +15,7 @@ export default [
 			'stop * music',
 		],
 		action: () => {
-			Window.Assistant.say('Alright will do!');
-			RobotJS.keyTap('audio_play');
+			Window.Assistant.say('This is functionality is temporary disabled.');
 		},
 	},
 ];

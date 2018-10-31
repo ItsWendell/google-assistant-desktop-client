@@ -6,7 +6,10 @@ import { EventEmitter } from 'events';
 export default class Player extends EventEmitter {
 	constructor() {
 		super();
+		this.initialize();
+	}
 
+	initialize() {
 		/** Variables for the Audio Player */
 		this.mediaSource = new MediaSource();
 
@@ -19,11 +22,12 @@ export default class Player extends EventEmitter {
 		this.setup();
 		this.setupAudioProcessor();
 	}
+
 	/**
 	 * Reconstructs the current player.
 	 */
 	reset() {
-		this.constructor();
+		this.initialize();
 	}
 
 	/**
