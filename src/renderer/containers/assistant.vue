@@ -30,6 +30,7 @@
 				@click="assist"
 			>
 				<img
+					class="ic-mic"
 					v-if="status !== 'listening'"
 					src="static/ic_mic.png" />
 				<v-icon v-else>hearing</v-icon>
@@ -162,5 +163,10 @@ html {
   padding: 0 !important;
   background-color: transparent !important;
   flex: 1;
+}
+
+.ic-mic {
+  max-width: 100%;
+  height: auto;
 }
 </style>

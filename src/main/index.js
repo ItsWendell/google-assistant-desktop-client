@@ -107,14 +107,9 @@ function registerEvents() {
 		if (!assistantWindow) return;
 
 		assistantWindow.webContents.send('message', message);
-		if (message.event) {
-			if (message.event.cardHide) {
-				if (responseWindow) {
-					// responseWindow.hide();
-					console.log('Should HIDE');
-					// assistantWindow.setAlwaysOnTop(false);
-				}
-			}
+		if (message.event && message.event.cardHide && responseWindow) {
+			responseWindow.hide();
+			assistantWindow.setAlwaysOnTop(false);
 		}
 	});
 
@@ -122,7 +117,7 @@ function registerEvents() {
 		if (!responseWindow) return;
 		responseWindow.webContents.send('response', html);
 		responseWindow.show();
-		// assistantWindow.setAlwaysOnTop(true);
+		assistantWindow.setAlwaysOnTop(true);
 	});
 
 	ipcMain.on('miniToolbar', () => {
