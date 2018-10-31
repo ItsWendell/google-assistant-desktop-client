@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 
-import assistantStore from '@/stores/assistant';
+import assistantStore from './assistant';
 
 Vue.use(Vuex);
 

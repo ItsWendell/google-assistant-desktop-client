@@ -4,7 +4,7 @@ import fs from 'fs';
 import mkdirp from 'mkdirp';
 import path from 'path';
 import { google } from 'googleapis';
-import ElectronGoogleOAuth from './google';
+import ElectronGoogleOAuth from './google-electron-auth';
 
 const { OAuth2 } = google.auth;
 /**

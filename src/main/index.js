@@ -13,7 +13,6 @@ if (process.env.NODE_ENV === 'development') {
 	try {
 		// eslint-disable-next-line
 		require('electron-debug')({
-			showDevTools: true,
 			showDevTools: 'undocked',
 		});
 	} catch (err) {
@@ -108,13 +107,9 @@ function registerEvents() {
 		if (!assistantWindow) return;
 
 		assistantWindow.webContents.send('message', message);
-		if (message.event) {
-			if (message.event.cardHide) {
-				if (responseWindow) {
-					responseWindow.hide();
-					assistantWindow.setAlwaysOnTop(false);
-				}
-			}
+		if (message.event && message.event.cardHide && responseWindow) {
+			responseWindow.hide();
+			assistantWindow.setAlwaysOnTop(false);
 		}
 	});
 

@@ -130,11 +130,11 @@ export default class SpotifyClient extends EventEmitter {
 
 	searchTrack(searchTerm) {
 		this.spotifyClient.searchTracks(searchTerm)
-		.then((data) => {
-			console.log('Results for search term; ', data.body);
-		}, (err) => {
-			console.error(err);
-		});
+			.then((data) => {
+				console.log('Results for search term; ', data.body);
+			}, (err) => {
+				console.error(err);
+			});
 	}
 
 	skipToNext() {

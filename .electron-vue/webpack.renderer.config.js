@@ -23,7 +23,7 @@ let whiteListedModules = ['vue', 'vuetify']
 let rendererConfig = {
 	mode: 'none',
 	entry: {
-		renderer: path.join(__dirname, '../src/renderer/main.js')
+		renderer: path.join(__dirname, '../src/renderer/index.js')
 	},
 	externals: [
 		...Object.keys(dependencies || {}).filter(d => !whiteListedModules.includes(d))

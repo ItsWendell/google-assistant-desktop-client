@@ -1,13 +1,11 @@
-// eslint-disable-next-line
-import { ipcRenderer, remote } from 'electron';
+import { ipcRenderer } from 'electron';
 import { EventEmitter } from 'events';
 import opn from 'opn';
 
 import GoogleAssistant from 'google-assistant';
 
 import Configuration from '@/config';
-
-import Commands from '@/commands';
+import Commands from '@/providers/commands';
 
 import Player from './player';
 import Microphone from './microphone';
@@ -179,17 +177,17 @@ export default class Assistant extends EventEmitter {
 								this.microphone.enabled = true;
 								this.assist();
 								this.conversation.removeAllListeners('transcription')
-								.on('transcription', ({ transcription, done }) => {
-									this.disableOutput = true;
-									console.info('[Assistant Client] Answer - Speech Results:', transcription);
-									if (done) {
-										console.info('[Assistant Client] Final Answer:', transcription);
-										this.disableOutput = false;
-										this.stopConversation(true).then(() => {
-											resolve(transcription);
-										});
-									}
-								});
+									.on('transcription', ({ transcription, done }) => {
+										this.disableOutput = true;
+										console.info('[Assistant Client] Answer - Speech Results:', transcription);
+										if (done) {
+											console.info('[Assistant Client] Final Answer:', transcription);
+											this.disableOutput = false;
+											this.stopConversation(true).then(() => {
+												resolve(transcription);
+											});
+										}
+									});
 							});
 						}
 					});

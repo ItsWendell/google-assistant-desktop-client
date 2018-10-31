@@ -30,6 +30,7 @@
 				@click="assist"
 			>
 				<img
+					class="ic-mic"
 					v-if="status !== 'listening'"
 					src="static/ic_mic.png" />
 				<v-icon v-else>hearing</v-icon>
@@ -41,30 +42,31 @@
 <script>
 import { ipcRenderer } from 'electron';
 
-import Authentication from '@/auth';
-import Assistant from './assistant/index';
+import Authentication from '@/providers/authentication';
+import Assistant from '@/providers/assistant';
 
 export default {
 	name: 'AssistantWindow',
-	components: { },
+	components: {},
 	data: () => ({
 		inputQuery: '',
 		showTextField: false,
 		status: 'loading',
 	}),
 	computed: {
-		showActions: function () {
-			return this.status !== 'loading'
+		showActions() {
+			return this.status !== 'loading';
 		},
 	},
 	mounted() {
+    // Listen for main process triggers to start the assistant.
 		ipcRenderer.on('start-assistant', () => {
 			Window.Assistant.player.playPing();
 			this.assist();
 		});
 		setTimeout(() => {
-			// boot up the entire app!
-				/** Registering global authenticator */
+      // boot up the entire app!
+      /** Registering global authenticator */
 			Window.Auth = new Authentication();
 			Window.Auth.once('authenticated', () => {
 				console.log('Authenticated, setup up Google Assistant...');
@@ -161,5 +163,10 @@ html {
   padding: 0 !important;
   background-color: transparent !important;
   flex: 1;
+}
+
+.ic-mic {
+  max-width: 100%;
+  height: auto;
 }
 </style>

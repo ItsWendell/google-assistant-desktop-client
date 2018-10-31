@@ -1,28 +1,26 @@
 /* eslint-disable */
 import '@babel/polyfill';
 
-// eslint-disable-next-line
-import { ipcRenderer } from 'electron';
-
 import Vue from 'vue';
-import axios from 'axios';
+import VueElectron from 'vue-electron';
 import Vuetify from 'vuetify';
+import axios from 'axios';
+
 
 import 'vuetify/dist/vuetify.css';
 
-import AssistantWindow from './Assistant';
-import ResponseWindow from './Response';
+import AssistantWindow from './containers/assistant';
+import ResponseWindow from './containers/response';
 
 import Vuex from 'vuex';
-import store from './store';
 
-import SpotifyClient from './spotify';
+import store from './providers/store';
+import SpotifyClient from './providers/spotify';
 
-
+Vue.use(VueElectron);
 Vue.use(Vuetify);
 Vue.use(Vuex);
 
-if (!process.env.IS_WEB) Vue.use(require('vue-electron'));
 Vue.http = Vue.prototype.$http = axios;
 Vue.config.productionTip = false;
 
