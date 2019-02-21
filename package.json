@@ -1,6 +1,6 @@
 {
 	"name": "ga-desktop",
-	"version": "0.4.1",
+	"version": "0.4.2",
 	"author": "Wendell Misiedjan",
 	"description": "A Google Assistant desktop Client",
 	"license": "n/a",
@@ -19,7 +19,7 @@
 		"pack:renderer": "cross-env NODE_ENV=production webpack --progress --colors --config .electron-vue/webpack.renderer.config.js",
 		"test": "npm run unit && npm run e2e",
 		"unit": "karma start test/unit/karma.conf.js",
-		"postinstall": "npx electron-rebuild",
+		"postinstall": "npm rebuild --target=4.0.3 --runtime=electron",
 		"start": "npm run dev"
 	},
 	"build": {
@@ -67,7 +67,7 @@
 		"fs": "0.0.1-security",
 		"google-assistant": "github:WMisiedjan/google-assistant#master",
 		"googleapis": "^34.0.0",
-		"grpc": "^1.15.1",
+		"grpc": "^1.18.0",
 		"jquery": "^3.3.1",
 		"metaget": "^1.0.6",
 		"mkdirp": "^0.5.1",
